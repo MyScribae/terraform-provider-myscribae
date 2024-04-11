@@ -12,12 +12,14 @@ import (
 )
 
 var _ resource.Resource = (*myscribaeProviderResource)(nil)
+var _ resource.ResourceWithConfigure = (*myscribaeProviderResource)(nil)
 
 type myscribaeProviderResource struct {
-	provider myScribaeProvider
+	provider *myScribaeProvider
 }
 
 type myscribaeProviderResourceData struct {
+	Id             types.String `tfsdk:"id"`
 	Uuid           types.String `tfsdk:"uuid"`
 	Name           types.String `tfsdk:"name"`
 	AltID          types.String `tfsdk:"alt_id"`
@@ -35,7 +37,16 @@ func newProviderResource() resource.Resource {
 }
 
 func (e *myscribaeProviderResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_resource"
+	resp.TypeName = "provider"
+}
+
+func (e *myscribaeProviderResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	if req.ProviderData == nil {
+		return
+	}
+
+	prov := req.ProviderData.(*myScribaeProvider)
+	e.provider = prov
 }
 
 func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -88,7 +99,7 @@ func (e *myscribaeProviderResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	err := e.provider.Client.Update(ctx, sdk.ProviderProfileInput{
+	resultUuid, err := e.provider.Client.Update(ctx, sdk.ProviderProfileInput{
 		AltID:          data.AltID.ValueString(),
 		Name:           data.Name.ValueString(),
 		Description:    data.Description.ValueString(),
@@ -111,6 +122,15 @@ func (e *myscribaeProviderResource) Create(ctx context.Context, req resource.Cre
 		)
 		return
 	}
+
+	data.Id = basetypes.NewStringValue(resultUuid.String())
+	data.Uuid = basetypes.NewStringValue(resultUuid.String())
+
+	diags := resp.State.Set(ctx, data)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 }
 
 func (e *myscribaeProviderResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -130,6 +150,7 @@ func (e *myscribaeProviderResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	data = myscribaeProviderResourceData{
+		Id:             basetypes.NewStringValue(profile.Uuid.String()),
 		Uuid:           basetypes.NewStringValue(profile.Uuid.String()),
 		Name:           basetypes.NewStringValue(profile.Name),
 		AltID:          basetypes.NewStringPointerValue(profile.AltID),
@@ -153,7 +174,7 @@ func (e *myscribaeProviderResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	err := e.provider.Client.Update(ctx, sdk.ProviderProfileInput{
+	resultUuid, err := e.provider.Client.Update(ctx, sdk.ProviderProfileInput{
 		AltID:          data.AltID.ValueString(),
 		Name:           data.Name.ValueString(),
 		Description:    data.Description.ValueString(),
@@ -166,14 +187,19 @@ func (e *myscribaeProviderResource) Update(ctx context.Context, req resource.Upd
 	})
 
 	if err != nil {
-		resp.Diagnostics.Append(
-			[]diag.Diagnostic{
-				diag.NewErrorDiagnostic(
-					"failed to update provider",
-					err.Error(),
-				),
-			}...,
+		resp.Diagnostics.AddError(
+			"failed to update provider",
+			err.Error(),
 		)
+		return
+	}
+
+	data.Id = basetypes.NewStringValue(resultUuid.String())
+	data.Uuid = basetypes.NewStringValue(resultUuid.String())
+
+	diags := resp.State.Set(ctx, data)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 }

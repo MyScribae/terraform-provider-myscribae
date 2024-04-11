@@ -11,12 +11,14 @@ import (
 )
 
 var _ resource.Resource = (*scriptGroupResource)(nil)
+var _ resource.ResourceWithConfigure = (*scriptGroupResource)(nil)
 
 type scriptGroupResource struct {
-	provider myScribaeProvider
+	provider *myScribaeProvider
 }
 
 type scriptGroupResourceData struct {
+	Id          types.String `tfsdk:"id"`
 	Uuid        types.String `tfsdk:"uuid"`
 	AltID       types.String `tfsdk:"alt_id"`
 	Name        types.String `tfsdk:"name"`
@@ -30,6 +32,15 @@ func newScriptGroupResource() resource.Resource {
 
 func (e *scriptGroupResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = "script_group"
+}
+
+func (e *scriptGroupResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	if req.ProviderData == nil {
+		return
+	}
+
+	prov := req.ProviderData.(*myScribaeProvider)
+	e.provider = prov
 }
 
 func (e *scriptGroupResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -77,6 +88,7 @@ func (e *scriptGroupResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	diags = resp.State.Set(ctx, &scriptGroupResourceData{
+		Id:          basetypes.NewStringValue(resultUuid.String()),
 		Uuid:        basetypes.NewStringValue(resultUuid.String()),
 		AltID:       data.AltID,
 		Name:        data.Name,
@@ -108,6 +120,7 @@ func (e *scriptGroupResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	diags = resp.State.Set(ctx, &scriptGroupResourceData{
+		Id:          basetypes.NewStringValue(profile.Uuid.String()),
 		Uuid:        basetypes.NewStringValue(profile.Uuid.String()),
 		AltID:       basetypes.NewStringValue(profile.AltID),
 		Name:        basetypes.NewStringValue(profile.Name),
@@ -140,6 +153,7 @@ func (e *scriptGroupResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	data.Uuid = basetypes.NewStringValue(resultUuid.String())
+	data.Id = basetypes.NewStringValue(resultUuid.String())
 
 	diags = resp.State.Set(ctx, &data)
 	if diags.HasError() {

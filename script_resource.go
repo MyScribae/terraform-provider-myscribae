@@ -11,12 +11,14 @@ import (
 )
 
 var _ resource.Resource = (*scriptResource)(nil)
+var _ resource.ResourceWithConfigure = (*scriptResource)(nil)
 
 type scriptResource struct {
-	provider myScribaeProvider
+	provider *myScribaeProvider
 }
 
 type scriptResourceData struct {
+	Id               types.String `tfsdk:"id"`
 	Uuid             types.String `tfsdk:"uuid"`
 	ScriptGroupUuid  types.String `tfsdk:"script_group_uuid"`
 	AltID            types.String `tfsdk:"alt_id"`
@@ -35,6 +37,15 @@ func newScriptResource() resource.Resource {
 
 func (e *scriptResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = "script"
+}
+
+func (e *scriptResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	if req.ProviderData == nil {
+		return
+	}
+
+	prov := req.ProviderData.(*myScribaeProvider)
+	e.provider = prov
 }
 
 func (e *scriptResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -110,6 +121,7 @@ func (e *scriptResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	diags = resp.State.Set(ctx, &scriptResourceData{
+		Id:               basetypes.NewStringValue(resultUuid.String()),
 		Uuid:             basetypes.NewStringValue(resultUuid.String()),
 		ScriptGroupUuid:  data.ScriptGroupUuid,
 		AltID:            data.AltID,
@@ -148,6 +160,7 @@ func (e *scriptResource) Read(ctx context.Context, req resource.ReadRequest, res
 	}
 
 	diags = resp.State.Set(ctx, &scriptResourceData{
+		Id:               basetypes.NewStringValue(profile.Uuid.String()),
 		Uuid:             basetypes.NewStringValue(profile.Uuid.String()),
 		ScriptGroupUuid:  data.ScriptGroupUuid,
 		AltID:            data.AltID,
@@ -196,6 +209,7 @@ func (e *scriptResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	diags = resp.State.Set(ctx, &scriptResourceData{
+		Id:               basetypes.NewStringValue(resultUuid.String()),
 		Uuid:             basetypes.NewStringValue(resultUuid.String()),
 		ScriptGroupUuid:  data.ScriptGroupUuid,
 		AltID:            data.AltID,

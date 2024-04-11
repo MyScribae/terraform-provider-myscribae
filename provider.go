@@ -2,16 +2,25 @@ package main
 
 import (
 	"context"
+	"os"
 
 	myscribae_sdk "github.com/Pritch009/myscribae-sdk-go"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 type myScribaeProvider struct {
-	Client myscribae_sdk.Provider
+	ApiKey    string
+	SecretKey string
+	Client    *myscribae_sdk.Provider
+}
+
+type myScribaeProviderConfig struct {
+	ApiKey    types.String
+	SecretKey types.String
 }
 
 var _ provider.Provider = (*myScribaeProvider)(nil)
@@ -23,6 +32,58 @@ func New() func() provider.Provider {
 }
 
 func (p *myScribaeProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+	apiKey := os.Getenv("MYSCRIBAE_API_KEY")
+	secretKey := os.Getenv("MYSCRIBAE_SECRET_KEY")
+	apiUrl := os.Getenv("MYSCRIBAE_API_URL")
+
+	var cfg myScribaeProviderConfig
+
+	diags := req.Config.Get(ctx, &cfg)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	if cfg.ApiKey.ValueString() != "" {
+		apiKey = cfg.ApiKey.ValueString()
+	}
+
+	if cfg.SecretKey.ValueString() != "" {
+		secretKey = cfg.SecretKey.ValueString()
+	}
+
+	if apiUrl == "" {
+		apiUrl = "https://api.myscribae.com"
+	}
+
+	if apiKey == "" {
+		resp.Diagnostics.AddError("api_key is required", "Please provide your API key for MyScribae")
+		return
+	}
+
+	if secretKey == "" {
+		resp.Diagnostics.AddError("secret_key is required", "Please provide your secret key for MyScribae")
+		return
+	}
+
+	client, err := myscribae_sdk.NewProvider(
+		myscribae_sdk.ProviderConfig{
+			Url:       &apiUrl,
+			ApiKey:    &apiKey,
+			SecretKey: &secretKey,
+		},
+	)
+	if err != nil {
+		resp.Diagnostics.AddError("error creating MyScribae client", err.Error())
+		return
+	}
+
+	p.ApiKey = apiKey
+	p.SecretKey = secretKey
+	p.Client = client
+
+	resp.DataSourceData = p
+	resp.ResourceData = p
 }
 
 func (p *myScribaeProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -31,7 +92,9 @@ func (p *myScribaeProvider) Metadata(ctx context.Context, req provider.MetadataR
 
 func (p *myScribaeProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		// NewDataSource
+		newProviderDataSource,
+		newScriptGroupDataSource,
+		newScriptDataSource,
 	}
 }
 
