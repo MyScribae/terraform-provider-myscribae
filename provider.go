@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	myscribae_sdk "github.com/Pritch009/myscribae-sdk-go"
+	myscribae_sdk "github.com/MyScribae/myscribae-sdk-go"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"

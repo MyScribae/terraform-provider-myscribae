@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 
-	sdk "github.com/Pritch009/myscribae-sdk-go/provider"
-	"github.com/Pritch009/myscribae-terraform-provider/validators"
+	sdk "github.com/MyScribae/myscribae-sdk-go/provider"
+	"github.com/MyScribae/myscribae-terraform-provider/validators"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"

@@ -1,4 +1,4 @@
-module github.com/Pritch009/myscribae-terraform-provider
+module github.com/MyScribae/myscribae-terraform-provider
 
 go 1.22.0
 
