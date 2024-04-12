@@ -4,8 +4,11 @@ import (
 	"context"
 
 	sdk "github.com/Pritch009/myscribae-sdk-go"
+	"github.com/Pritch009/myscribae-terraform-provider/validators"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -31,7 +34,7 @@ func newScriptGroupResource() resource.Resource {
 }
 
 func (e *scriptGroupResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "script_group"
+	resp.TypeName = "myscribae_script_group"
 }
 
 func (e *scriptGroupResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -46,17 +49,30 @@ func (e *scriptGroupResource) Configure(ctx context.Context, req resource.Config
 func (e *scriptGroupResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Description: "The id of the script group",
+				Computed:    true,
+			},
 			"alt_id": schema.StringAttribute{
 				Description: "The alt id of the script group",
 				Required:    true,
+				Validators: []validator.String{
+					validators.NewAltIdValidator(),
+				},
 			},
 			"name": schema.StringAttribute{
 				Description: "The name of the script group",
 				Required:    true,
+				Validators: []validator.String{
+					stringvalidator.LengthBetween(1, 100),
+				},
 			},
 			"description": schema.StringAttribute{
 				Description: "The description of the script group",
 				Required:    true,
+				Validators: []validator.String{
+					stringvalidator.LengthBetween(3, 500),
+				},
 			},
 			"public": schema.BoolAttribute{
 				Description: "Is the script group public",

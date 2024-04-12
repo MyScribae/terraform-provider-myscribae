@@ -4,9 +4,12 @@ import (
 	"context"
 
 	sdk "github.com/Pritch009/myscribae-sdk-go/provider"
+	"github.com/Pritch009/myscribae-terraform-provider/validators"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -55,30 +58,51 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 			"name": schema.StringAttribute{
 				Description: "The name of the provider",
 				Required:    true,
+				Validators: []validator.String{
+					stringvalidator.LengthBetween(1, 100),
+				},
 			},
 			"alt_id": schema.StringAttribute{
 				Description: "The alt id of the provider",
 				Required:    false,
+				Validators: []validator.String{
+					validators.NewAltIdValidator(),
+				},
 			},
 			"description": schema.StringAttribute{
 				Description: "The description of the provider",
 				Required:    true,
+				Validators: []validator.String{
+					stringvalidator.LengthBetween(3, 500),
+				},
 			},
 			"logo_url": schema.StringAttribute{
 				Description: "The logo url of the provider",
 				Required:    false,
+				Validators: []validator.String{
+					validators.NewUrlValidator(),
+				},
 			},
 			"banner_url": schema.StringAttribute{
 				Description: "The banner url of the provider",
 				Required:    false,
+				Validators: []validator.String{
+					validators.NewUrlValidator(),
+				},
 			},
 			"url": schema.StringAttribute{
 				Description: "The url of the provider",
 				Required:    false,
+				Validators: []validator.String{
+					validators.NewUrlValidator(),
+				},
 			},
 			"color": schema.StringAttribute{
 				Description: "The color of the provider",
 				Required:    false,
+				Validators: []validator.String{
+					validators.NewColorValidator(),
+				},
 			},
 			"public": schema.BoolAttribute{
 				Description: "The public status of the provider",

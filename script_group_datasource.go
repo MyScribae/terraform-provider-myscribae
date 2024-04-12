@@ -20,7 +20,7 @@ func newScriptGroupDataSource() datasource.DataSource {
 }
 
 func (e *scriptGroupDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = "myscribae_script_group"
+	resp.TypeName = "data_myscribae_script_group"
 }
 
 func (e *scriptGroupDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

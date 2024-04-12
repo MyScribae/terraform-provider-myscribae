@@ -4,8 +4,13 @@ import (
 	"context"
 
 	sdk "github.com/Pritch009/myscribae-sdk-go"
+	"github.com/Pritch009/myscribae-terraform-provider/validators"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -36,7 +41,7 @@ func newScriptResource() resource.Resource {
 }
 
 func (e *scriptResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "script"
+	resp.TypeName = "myscribae_script"
 }
 
 func (e *scriptResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -51,37 +56,61 @@ func (e *scriptResource) Configure(ctx context.Context, req resource.ConfigureRe
 func (e *scriptResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"script_group_uuid": schema.StringAttribute{
+			"script_group_id": schema.StringAttribute{
 				Description: "The script group uuid",
 				Required:    true,
+				Validators: []validator.String{
+					validators.NewUuidValidator(),
+				},
 			},
 			"alt_id": schema.StringAttribute{
 				Description: "The alt id of the script",
 				Required:    true,
+				Validators: []validator.String{
+					validators.NewAltIdValidator(),
+				},
 			},
 			"name": schema.StringAttribute{
 				Description: "The name of the script",
 				Required:    true,
+				Validators: []validator.String{
+					stringvalidator.LengthBetween(1, 100),
+				},
 			},
 			"description": schema.StringAttribute{
 				Description: "The description of the script",
 				Required:    true,
+				Validators: []validator.String{
+					stringvalidator.LengthBetween(3, 500),
+				},
 			},
 			"recurrence": schema.StringAttribute{
 				Description: "The recurrence of the script",
 				Required:    true,
+				Validators: []validator.String{
+					validators.NewRecurrenceValidator(),
+				},
 			},
-			"price_in_cents": schema.NumberAttribute{
-				Description: "The price in cents of the script",
+			"price_in_cents": schema.Int64Attribute{
+				Description: "The price in cents of the script (minimum 1)",
 				Required:    true,
+				Validators: []validator.Int64{
+					int64validator.AtLeast(1),
+				},
 			},
-			"sla_sec": schema.NumberAttribute{
-				Description: "The SLA in seconds of the script",
+			"sla_sec": schema.Int64Attribute{
+				Description: "The SLA in seconds of the script (minimum 2400)",
 				Required:    true,
+				Validators: []validator.Int64{
+					int64validator.AtLeast(2400),
+				},
 			},
-			"token_lifetime_sec": schema.NumberAttribute{
-				Description: "The token lifetime in seconds of the script",
+			"token_lifetime_sec": schema.Int64Attribute{
+				Description: "The token lifetime in seconds of the script (minimum 600)",
 				Required:    true,
+				Validators: []validator.Int64{
+					int64validator.AtLeast(600),
+				},
 			},
 			"public": schema.BoolAttribute{
 				Description: "Is the script public",
@@ -89,6 +118,26 @@ func (e *scriptResource) Schema(ctx context.Context, req resource.SchemaRequest,
 			},
 		},
 	}
+}
+
+func (e *scriptResource) Plan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	data := scriptResourceData{}
+	diags := req.State.Get(ctx, data)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	recurrence := data.Recurrence.ValueStringPointer()
+	// Check if recurrence
+	if recurrence != nil && *recurrence != "" {
+		diags = resp.Plan.SetAttribute(ctx, path.Root("recurrence"), data.Recurrence)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
+
 }
 
 func (e *scriptResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
