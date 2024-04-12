@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	myscribae_sdk "github.com/MyScribae/myscribae-sdk-go"
+	sdk "github.com/MyScribae/myscribae-sdk-go"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -15,7 +15,7 @@ import (
 type myScribaeProvider struct {
 	ApiKey    string
 	SecretKey string
-	Client    *myscribae_sdk.Provider
+	Client    *sdk.Provider
 }
 
 type myScribaeProviderConfig struct {
@@ -66,8 +66,8 @@ func (p *myScribaeProvider) Configure(ctx context.Context, req provider.Configur
 		return
 	}
 
-	client, err := myscribae_sdk.NewProvider(
-		myscribae_sdk.ProviderConfig{
+	client, err := sdk.NewProvider(
+		sdk.ProviderConfig{
 			Url:       &apiUrl,
 			ApiKey:    &apiKey,
 			SecretKey: &secretKey,
