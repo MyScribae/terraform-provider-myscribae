@@ -4,12 +4,12 @@ import (
 	"context"
 	"os"
 
-	sdk "github.com/MyScribae/myscribae-sdk-go"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	sdk "github.com/myscribae/myscribae-sdk-go"
 )
 
 type myScribaeProvider struct {

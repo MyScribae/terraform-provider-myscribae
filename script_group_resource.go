@@ -3,14 +3,14 @@ package main
 import (
 	"context"
 
-	sdk "github.com/MyScribae/myscribae-sdk-go"
-	"github.com/MyScribae/myscribae-terraform-provider/validators"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	sdk "github.com/myscribae/myscribae-sdk-go"
+	"github.com/myscribae/myscribae-terraform-provider/validators"
 )
 
 var _ resource.Resource = (*scriptGroupResource)(nil)

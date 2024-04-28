@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 
-	sdk "github.com/MyScribae/myscribae-sdk-go/provider"
-	"github.com/MyScribae/myscribae-terraform-provider/validators"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -12,6 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/myscribae/myscribae-terraform-provider/validators"
+
+	sdk "github.com/myscribae/myscribae-sdk-go"
 )
 
 var _ resource.Resource = (*myscribaeProviderResource)(nil)
