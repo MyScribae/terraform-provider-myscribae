@@ -3,13 +3,17 @@ package provider
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/myscribae/myscribae-sdk-go/provider"
 )
 
 type scriptGroupDataSource struct {
-	provider *myScribaeProvider
+	terraformProvider *myScribaeProvider
+	myscribaeProvider *provider.Provider
+	scriptGroup       *provider.ScriptGroup
 }
 
 var _ datasource.DataSource = (*scriptGroupDataSource)(nil)
@@ -20,7 +24,7 @@ func newScriptGroupDataSource() datasource.DataSource {
 }
 
 func (e *scriptGroupDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = "data_myscribae_script_group"
+	resp.TypeName = "myscribae_script_group"
 }
 
 func (e *scriptGroupDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -29,22 +33,42 @@ func (e *scriptGroupDataSource) Configure(ctx context.Context, req datasource.Co
 	}
 
 	prov := req.ProviderData.(*myScribaeProvider)
-	e.provider = prov
+	e.terraformProvider = prov
 }
 
 type scriptGroupResourceConfig struct {
-	AltID string `tfsdk:"alt_id"`
+	ProviderID string `tfsdk:"provider_id"`
+	AltID      string `tfsdk:"alt_id"`
 }
 
 func (e *scriptGroupDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"provider_id": schema.StringAttribute{
+				Description: "The provider id of the script group",
+				Required:    true,
+			},
 			"alt_id": schema.StringAttribute{
 				Description: "The alt id of the script group",
 				Required:    true,
 			},
 		},
 	}
+}
+
+func (e *scriptGroupDataSource) MakeClient(ctx context.Context, providerId string, altId string) error {
+	providerUuid, err := uuid.Parse(providerId)
+	if err != nil {
+		return err
+	}
+
+	e.myscribaeProvider = &provider.Provider{
+		Uuid:   providerUuid,
+		Client: e.terraformProvider.Client,
+	}
+	e.scriptGroup = e.myscribaeProvider.ScriptGroup(altId)
+
+	return nil
 }
 
 func (e *scriptGroupDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -54,9 +78,7 @@ func (e *scriptGroupDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 
-	sg := e.provider.Client.ScriptGroup(		data.AltID)
-
-	profile, err := sg.Read(ctx)
+	profile, err := e.scriptGroup.Read(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("error reading script group", err.Error())
 		return

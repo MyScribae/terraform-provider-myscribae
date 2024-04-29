@@ -9,19 +9,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	sdk "github.com/myscribae/myscribae-sdk-go"
+	"github.com/hasura/go-graphql-client"
+	"github.com/myscribae/myscribae-sdk-go/gql"
 )
 
 type myScribaeProvider struct {
-	ApiKey    string
-	SecretKey string
-	Client    *sdk.Provider
+	ApiToken string
+	ApiUrl   string
+	Client   *graphql.Client
 	Version  string
 }
 
 type myScribaeProviderConfig struct {
-	ApiKey    types.String
-	SecretKey types.String
+	ApiToken types.String
 }
 
 var _ provider.Provider = (*myScribaeProvider)(nil)
@@ -35,10 +35,9 @@ func New(version string) func() provider.Provider {
 }
 
 func (p *myScribaeProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	apiKey := os.Getenv("MYSCRIBAE_API_KEY")
-	secretKey := os.Getenv("MYSCRIBAE_SECRET_KEY")
+	// apiKey := os.Getenv("MYSCRIBAE_API_KEY")
 	apiUrl := os.Getenv("MYSCRIBAE_API_URL")
-
+	apiToken := os.Getenv("MYSCRIBAE_API_TOKEN")
 	var cfg myScribaeProviderConfig
 
 	diags := req.Config.Get(ctx, &cfg)
@@ -47,43 +46,20 @@ func (p *myScribaeProvider) Configure(ctx context.Context, req provider.Configur
 		return
 	}
 
-	if cfg.ApiKey.ValueString() != "" {
-		apiKey = cfg.ApiKey.ValueString()
-	}
-
-	if cfg.SecretKey.ValueString() != "" {
-		secretKey = cfg.SecretKey.ValueString()
+	if cfg.ApiToken.ValueString() != "" {
+		apiToken = cfg.ApiToken.ValueString()
 	}
 
 	if apiUrl == "" {
 		apiUrl = "https://api.myscribae.com"
 	}
 
-	if apiKey == "" {
-		resp.Diagnostics.AddError("api_key is required", "Please provide your API key for MyScribae")
-		return
-	}
-
-	if secretKey == "" {
-		resp.Diagnostics.AddError("secret_key is required", "Please provide your secret key for MyScribae")
-		return
-	}
-
-	client, err := sdk.NewProvider(
-		sdk.ProviderConfig{
-			Url:       &apiUrl,
-			ApiKey:    &apiKey,
-			SecretKey: &secretKey,
-		},
+	p.ApiUrl = apiUrl
+	p.ApiToken = apiToken
+	p.Client = gql.CreateGraphQLClient(
+		apiUrl,
+		&apiToken,
 	)
-	if err != nil {
-		resp.Diagnostics.AddError("error creating MyScribae client", err.Error())
-		return
-	}
-
-	p.ApiKey = apiKey
-	p.SecretKey = secretKey
-	p.Client = client
 
 	resp.DataSourceData = p
 	resp.ResourceData = p
@@ -112,12 +88,8 @@ func (p *myScribaeProvider) Resources(ctx context.Context) []func() resource.Res
 func (p *myScribaeProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"api_key": schema.StringAttribute{
-				Description: "The API key for the provider",
-				Required:    true,
-			},
-			"secret_key": schema.StringAttribute{
-				Description: "The secret key for the provider",
+			"api_token": schema.StringAttribute{
+				Description: "You must provide an API token to authenticate with the MyScribae API",
 				Required:    true,
 			},
 		},

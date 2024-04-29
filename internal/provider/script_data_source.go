@@ -3,14 +3,18 @@ package provider
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/myscribae/myscribae-sdk-go/provider"
 )
 
 type scriptDataSource struct {
-	provider *myScribaeProvider
+	terraformProvider *myScribaeProvider
+	myscribaeProvider *provider.Provider
+	script            *provider.Script
 }
 
 var _ datasource.DataSource = (*scriptDataSource)(nil)
@@ -30,17 +34,22 @@ func (e *scriptDataSource) Configure(ctx context.Context, req datasource.Configu
 	}
 
 	prov := req.ProviderData.(*myScribaeProvider)
-	e.provider = prov
+	e.terraformProvider = prov
 }
 
 type scriptResourceConfig struct {
+	ProviderID    types.String `tfsdk:"provider_id"`
 	AltID         types.String `tfsdk:"alt_id"`
-	ScriptGroupId types.String `tfsdk:"script_group_id"`
+	ScriptGroupID types.String `tfsdk:"script_group_id"`
 }
 
 func (e *scriptDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"provider_id": schema.StringAttribute{
+				Description: "The provider id of the script",
+				Required:    true,
+			},
 			"script_group_id": schema.StringAttribute{
 				Description: "The script group id",
 				Required:    true,
@@ -53,6 +62,20 @@ func (e *scriptDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 	}
 }
 
+func (e *scriptDataSource) MakeClient(ctx context.Context, providerId string, scriptGroupId string, altId string) error {
+	providerUuid, err := uuid.Parse(providerId)
+	if err != nil {
+		return err
+	}
+	e.myscribaeProvider = &provider.Provider{
+		Uuid:   providerUuid,
+		Client: e.terraformProvider.Client,
+	}
+	e.script = e.myscribaeProvider.Script(scriptGroupId, altId)
+
+	return nil
+}
+
 func (e *scriptDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	data := &scriptResourceConfig{}
 	if diags := req.Config.Get(ctx, data); diags.HasError() {
@@ -60,9 +83,12 @@ func (e *scriptDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	s := e.provider.Client.Script(data.ScriptGroupId.ValueString(), data.AltID.ValueString())
+	if err := e.MakeClient(ctx, data.ProviderID.ValueString(), data.ScriptGroupID.ValueString(), data.AltID.ValueString()); err != nil {
+		resp.Diagnostics.AddError("error making client", err.Error())
+		return
+	}
 
-	profile, err := s.Read(ctx)
+	profile, err := e.script.Read(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("error reading script", err.Error())
 		return

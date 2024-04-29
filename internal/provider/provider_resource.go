@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -10,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/myscribae/myscribae-sdk-go/provider"
 	"github.com/myscribae/myscribae-terraform-provider/validators"
 
 	sdk "github.com/myscribae/myscribae-sdk-go"
@@ -19,14 +21,14 @@ var _ resource.Resource = (*myscribaeProviderResource)(nil)
 var _ resource.ResourceWithConfigure = (*myscribaeProviderResource)(nil)
 
 type myscribaeProviderResource struct {
-	provider *myScribaeProvider
+	terraformProvider *myScribaeProvider
+	myscribaeProvider *sdk.Provider
 }
 
-type myscribaeProviderResourceData struct {
-	Id             types.String `tfsdk:"id"`
-	Uuid           types.String `tfsdk:"uuid"`
+type myscribaeProviderPlanData struct {
 	Name           types.String `tfsdk:"name"`
 	AltID          types.String `tfsdk:"alt_id"`
+	Uuid           types.String `tfsdk:"uuid"`
 	Description    types.String `tfsdk:"description"`
 	LogoUrl        types.String `tfsdk:"logo_url"`
 	BannerUrl      types.String `tfsdk:"banner_url"`
@@ -36,12 +38,20 @@ type myscribaeProviderResourceData struct {
 	AccountService types.Bool   `tfsdk:"account_service"`
 }
 
+type myscribaeProviderResourceData struct {
+	myscribaeProviderPlanData
+	Id        types.String `tfsdk:"id"`
+	Uuid      types.String `tfsdk:"uuid"`
+	SecretKey types.String `tfsdk:"secret_key"`
+	ApiKey    types.String `tfsdk:"api_key"`
+}
+
 func newProviderResource() resource.Resource {
 	return &myscribaeProviderResource{}
 }
 
 func (e *myscribaeProviderResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "provider"
+	resp.TypeName = "myscribae_provider"
 }
 
 func (e *myscribaeProviderResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -49,25 +59,31 @@ func (e *myscribaeProviderResource) Configure(ctx context.Context, req resource.
 		return
 	}
 
-	prov := req.ProviderData.(*myScribaeProvider)
-	e.provider = prov
+	e.terraformProvider = req.ProviderData.(*myScribaeProvider)
 }
 
 func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"alt_id": schema.StringAttribute{
+				Description: "The alt id of the provider",
+				Optional:    true,
+				Validators: []validator.String{
+					validators.NewAltIdValidator(),
+				},
+			},
+			"uuid": schema.StringAttribute{
+				Description: "The uuid of the provider",
+				Optional:    true,
+				Validators: []validator.String{
+					validators.NewUuidValidator(),
+				},
+			},
 			"name": schema.StringAttribute{
 				Description: "The name of the provider",
 				Required:    true,
 				Validators: []validator.String{
 					stringvalidator.LengthBetween(1, 100),
-				},
-			},
-			"alt_id": schema.StringAttribute{
-				Description: "The alt id of the provider",
-				Required:    false,
-				Validators: []validator.String{
-					validators.NewAltIdValidator(),
 				},
 			},
 			"description": schema.StringAttribute{
@@ -79,28 +95,28 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 			},
 			"logo_url": schema.StringAttribute{
 				Description: "The logo url of the provider",
-				Required:    false,
+				Optional:    true,
 				Validators: []validator.String{
 					validators.NewUrlValidator(),
 				},
 			},
 			"banner_url": schema.StringAttribute{
 				Description: "The banner url of the provider",
-				Required:    false,
+				Optional:    true,
 				Validators: []validator.String{
 					validators.NewUrlValidator(),
 				},
 			},
 			"url": schema.StringAttribute{
 				Description: "The url of the provider",
-				Required:    false,
+				Optional:    true,
 				Validators: []validator.String{
 					validators.NewUrlValidator(),
 				},
 			},
 			"color": schema.StringAttribute{
 				Description: "The color of the provider",
-				Required:    false,
+				Optional:    true,
 				Validators: []validator.String{
 					validators.NewColorValidator(),
 				},
@@ -117,41 +133,110 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 	}
 }
 
+func (e *myscribaeProviderResource) MakeClient(ctx context.Context, providerId string) error {
+	providerUuid, err := uuid.Parse(providerId)
+	if err != nil {
+		return err
+	}
+
+	e.myscribaeProvider = &sdk.Provider{
+		Uuid:   providerUuid,
+		Client: e.terraformProvider.Client,
+	}
+
+	return nil
+}
+
 func (e *myscribaeProviderResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	data := myscribaeProviderResourceData{}
-	if err := req.Plan.Get(ctx, &data); err != nil {
-		resp.Diagnostics.Append(err...)
+	planData := myscribaeProviderPlanData{}
+	if diags := req.Plan.Get(ctx, &planData); diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	resultUuid, err := e.provider.Client.Update(ctx, sdk.ProviderProfileInput{
-		AltID:          data.AltID.ValueString(),
-		Name:           data.Name.ValueString(),
-		Description:    data.Description.ValueString(),
-		LogoUrl:        data.LogoUrl.ValueStringPointer(),
-		BannerUrl:      data.BannerUrl.ValueStringPointer(),
-		Url:            data.Url.ValueStringPointer(),
-		Color:          data.Color.ValueStringPointer(),
-		Public:         data.Public.ValueBool(),
-		AccountService: data.AccountService.ValueBool(),
-	})
+	// if plan has uuid, then we just take over this provider
+	// if plan does not have uuid, then we attempt to create one
+	// with this provider
+
+	var err error
+	if planData.Uuid.IsNull() {
+		// create a new provider
+		e.myscribaeProvider, err = provider.CreateNewProvider(
+			ctx,
+			e.terraformProvider.Client,
+			&provider.ProviderProfileInput{
+				AltID:          planData.AltID.ValueStringPointer(),
+				Name:           planData.Name.ValueString(),
+				Description:    planData.Description.ValueString(),
+				LogoUrl:        planData.LogoUrl.ValueStringPointer(),
+				BannerUrl:      planData.BannerUrl.ValueStringPointer(),
+				Url:            planData.Url.ValueStringPointer(),
+				Color:          planData.Color.ValueStringPointer(),
+				Public:         planData.Public.ValueBool(),
+				AccountService: planData.AccountService.ValueBool(),
+			},
+		)
+
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"failed to create provider",
+				err.Error(),
+			)
+			return
+		}
+	} else {
+		// take over this provider
+		e.MakeClient(ctx, planData.Uuid.ValueString())
+
+		_, err = e.myscribaeProvider.Update(ctx, sdk.ProviderProfileInput{
+			AltID:          planData.AltID.ValueStringPointer(),
+			Name:           planData.Name.ValueString(),
+			Description:    planData.Description.ValueString(),
+			LogoUrl:        planData.LogoUrl.ValueStringPointer(),
+			BannerUrl:      planData.BannerUrl.ValueStringPointer(),
+			Url:            planData.Url.ValueStringPointer(),
+			Color:          planData.Color.ValueStringPointer(),
+			Public:         planData.Public.ValueBool(),
+			AccountService: planData.AccountService.ValueBool(),
+		})
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"failed to update provider",
+				err.Error(),
+			)
+			return
+		}
+
+		// if we do not have a secret key, which likely, then we must update the secret key and keep it in state
+		// this is a one time operation, unless the secret key needs to be reset
+		err = e.myscribaeProvider.ResetProviderKeys(ctx)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"failed to reset provider keys",
+				err.Error(),
+			)
+			return
+		}
+
+	}
 
 	if err != nil {
-		resp.Diagnostics.Append(
-			[]diag.Diagnostic{
-				diag.NewErrorDiagnostic(
-					"failed to create provider",
-					err.Error(),
-				),
-			}...,
+		resp.Diagnostics.AddError(
+			"failed to create provider",
+			err.Error(),
 		)
 		return
 	}
 
-	data.Id = basetypes.NewStringValue(resultUuid.String())
-	data.Uuid = basetypes.NewStringValue(resultUuid.String())
+	state := myscribaeProviderResourceData{
+		myscribaeProviderPlanData: planData,
+		Id:                        basetypes.NewStringValue(e.myscribaeProvider.Uuid.String()),
+		Uuid:                      basetypes.NewStringValue(e.myscribaeProvider.Uuid.String()),
+		SecretKey:                 basetypes.NewStringPointerValue(e.myscribaeProvider.SecretKey),
+		ApiKey:                    basetypes.NewStringPointerValue(e.myscribaeProvider.ApiKey),
+	}
 
-	diags := resp.State.Set(ctx, data)
+	diags := resp.State.Set(ctx, state)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -159,13 +244,15 @@ func (e *myscribaeProviderResource) Create(ctx context.Context, req resource.Cre
 }
 
 func (e *myscribaeProviderResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	data := myscribaeProviderResourceData{}
-	if err := req.State.Get(ctx, &data); err != nil {
+	currentState := myscribaeProviderResourceData{}
+	if err := req.State.Get(ctx, &currentState); err != nil {
 		resp.Diagnostics.Append(err...)
 		return
 	}
 
-	profile, err := e.provider.Client.Read(ctx)
+	e.MakeClient(ctx, currentState.Id.ValueString())
+
+	profile, err := e.myscribaeProvider.Read(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"failed to get provider profile",
@@ -174,41 +261,60 @@ func (e *myscribaeProviderResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	data = myscribaeProviderResourceData{
-		Id:             basetypes.NewStringValue(profile.Uuid.String()),
-		Uuid:           basetypes.NewStringValue(profile.Uuid.String()),
-		Name:           basetypes.NewStringValue(profile.Name),
-		AltID:          basetypes.NewStringPointerValue(profile.AltID),
-		Description:    basetypes.NewStringValue(profile.Description),
-		LogoUrl:        basetypes.NewStringPointerValue(profile.LogoUrl),
-		BannerUrl:      basetypes.NewStringPointerValue(profile.BannerUrl),
-		Url:            basetypes.NewStringPointerValue(profile.Url),
-		Color:          basetypes.NewStringPointerValue(profile.Color),
-		Public:         basetypes.NewBoolValue(profile.Public),
-		AccountService: basetypes.NewBoolValue(profile.AccountService),
+	newState := myscribaeProviderResourceData{
+		SecretKey: currentState.SecretKey,
+		ApiKey:    currentState.ApiKey,
+		Id:        basetypes.NewStringValue(profile.Uuid.String()),
+		Uuid:      basetypes.NewStringValue(profile.Uuid.String()),
+		myscribaeProviderPlanData: myscribaeProviderPlanData{
+			Name:           basetypes.NewStringValue(profile.Name),
+			AltID:          basetypes.NewStringPointerValue(profile.AltID),
+			Description:    basetypes.NewStringValue(profile.Description),
+			LogoUrl:        basetypes.NewStringPointerValue(profile.LogoUrl),
+			BannerUrl:      basetypes.NewStringPointerValue(profile.BannerUrl),
+			Url:            basetypes.NewStringPointerValue(profile.Url),
+			Color:          basetypes.NewStringPointerValue(profile.Color),
+			Public:         basetypes.NewBoolValue(profile.Public),
+			AccountService: basetypes.NewBoolValue(profile.AccountService),
+		},
 	}
 
-	d := resp.State.Set(ctx, data)
-	resp.Diagnostics.Append(d...)
+	if d := resp.State.Set(ctx, &newState); d.HasError() {
+		resp.Diagnostics.Append(d...)
+	}
 }
 
 func (e *myscribaeProviderResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	data := myscribaeProviderResourceData{}
-	if err := req.Plan.Get(ctx, &data); err != nil {
-		resp.Diagnostics.Append(err...)
+	currentState := myscribaeProviderResourceData{}
+	if diags := req.State.Get(ctx, &currentState); diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	resultUuid, err := e.provider.Client.Update(ctx, sdk.ProviderProfileInput{
-		AltID:          data.AltID.ValueString(),
-		Name:           data.Name.ValueString(),
-		Description:    data.Description.ValueString(),
-		LogoUrl:        data.LogoUrl.ValueStringPointer(),
-		BannerUrl:      data.BannerUrl.ValueStringPointer(),
-		Url:            data.Url.ValueStringPointer(),
-		Color:          data.Color.ValueStringPointer(),
-		Public:         data.Public.ValueBool(),
-		AccountService: data.AccountService.ValueBool(),
+	if err := e.MakeClient(ctx, currentState.Id.ValueString()); err != nil {
+		resp.Diagnostics.AddError(
+			"failed to make client",
+			err.Error(),
+		)
+		return
+	}
+
+	planData := myscribaeProviderPlanData{}
+	if diags := req.Plan.Get(ctx, &planData); diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	resultUuid, err := e.myscribaeProvider.Update(ctx, sdk.ProviderProfileInput{
+		AltID:          planData.AltID.ValueStringPointer(),
+		Name:           planData.Name.ValueString(),
+		Description:    planData.Description.ValueString(),
+		LogoUrl:        planData.LogoUrl.ValueStringPointer(),
+		BannerUrl:      planData.BannerUrl.ValueStringPointer(),
+		Url:            planData.Url.ValueStringPointer(),
+		Color:          planData.Color.ValueStringPointer(),
+		Public:         planData.Public.ValueBool(),
+		AccountService: planData.AccountService.ValueBool(),
 	})
 
 	if err != nil {
@@ -219,10 +325,15 @@ func (e *myscribaeProviderResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	data.Id = basetypes.NewStringValue(resultUuid.String())
-	data.Uuid = basetypes.NewStringValue(resultUuid.String())
+	newState := myscribaeProviderResourceData{
+		Id:                        basetypes.NewStringValue(resultUuid.String()),
+		Uuid:                      basetypes.NewStringValue(resultUuid.String()),
+		SecretKey:                 currentState.SecretKey,
+		ApiKey:                    currentState.ApiKey,
+		myscribaeProviderPlanData: planData,
+	}
 
-	diags := resp.State.Set(ctx, data)
+	diags := resp.State.Set(ctx, newState)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -230,14 +341,22 @@ func (e *myscribaeProviderResource) Update(ctx context.Context, req resource.Upd
 }
 
 func (e *myscribaeProviderResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	data := myscribaeProviderResourceData{}
-	if err := req.State.Get(ctx, &data); err != nil {
-		resp.Diagnostics.Append(err...)
+	currentState := myscribaeProviderResourceData{}
+	if diags := req.State.Get(ctx, &currentState); diags != nil {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	if err := e.MakeClient(ctx, currentState.Id.ValueString()); err != nil {
+		resp.Diagnostics.AddError(
+			"failed to make client",
+			err.Error(),
+		)
 		return
 	}
 
 	// update provider to make it private
-	err := e.provider.Client.SetPublic(ctx, false)
+	err := e.myscribaeProvider.SetPublic(ctx, false)
 	if err != nil {
 		resp.Diagnostics.Append(
 			[]diag.Diagnostic{

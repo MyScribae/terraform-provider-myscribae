@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -12,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	sdk "github.com/myscribae/myscribae-sdk-go"
+	"github.com/myscribae/myscribae-sdk-go/provider"
 	"github.com/myscribae/myscribae-terraform-provider/validators"
 )
 
@@ -19,13 +21,16 @@ var _ resource.Resource = (*scriptResource)(nil)
 var _ resource.ResourceWithConfigure = (*scriptResource)(nil)
 
 type scriptResource struct {
-	provider *myScribaeProvider
+	terraformProvider *myScribaeProvider
+	myscribaeProvider *provider.Provider
+	script            *provider.Script
 }
 
 type scriptResourceData struct {
+	ProviderID       types.String `tfsdk:"provider_id"`
+	ScriptGroupID    types.String `tfsdk:"script_group_id"`
 	Id               types.String `tfsdk:"id"`
 	Uuid             types.String `tfsdk:"uuid"`
-	ScriptGroupUuid  types.String `tfsdk:"script_group_uuid"`
 	AltID            types.String `tfsdk:"alt_id"`
 	Name             types.String `tfsdk:"name"`
 	Description      types.String `tfsdk:"description"`
@@ -50,12 +55,33 @@ func (e *scriptResource) Configure(ctx context.Context, req resource.ConfigureRe
 	}
 
 	prov := req.ProviderData.(*myScribaeProvider)
-	e.provider = prov
+	e.terraformProvider = prov
+}
+
+func (e *scriptResource) MakeClient(ctx context.Context, providerId string, scriptGroupId string, altId string) error {
+	providerUuid, err := uuid.Parse(providerId)
+	if err != nil {
+		return err
+	}
+	e.myscribaeProvider = &provider.Provider{
+		Uuid:   providerUuid,
+		Client: e.terraformProvider.Client,
+	}
+	e.script = e.myscribaeProvider.Script(scriptGroupId, altId)
+
+	return nil
 }
 
 func (e *scriptResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"provider_id": schema.StringAttribute{
+				Description: "The provider id of the script",
+				Required:    true,
+				Validators: []validator.String{
+					validators.NewUuidValidator(),
+				},
+			},
 			"script_group_id": schema.StringAttribute{
 				Description: "The script group uuid",
 				Required:    true,
@@ -148,11 +174,14 @@ func (e *scriptResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	s := e.provider.Client.Script(
-		data.ScriptGroupUuid.ValueString(),
-		data.AltID.ValueString(),
-	)
-	resultUuid, err := s.Create(ctx, sdk.ScriptInput{
+	if err := e.MakeClient(ctx, data.ProviderID.ValueString(), data.ScriptGroupID.ValueString(), data.AltID.ValueString()); err != nil {
+		resp.Diagnostics.AddError(
+			"failed to create client",
+			err.Error(),
+		)
+	}
+
+	resultUuid, err := e.script.Create(ctx, sdk.ScriptInput{
 		Name:             data.Name.ValueString(),
 		Description:      data.Description.ValueString(),
 		Recurrence:       data.Recurrence.ValueString(),
@@ -172,7 +201,7 @@ func (e *scriptResource) Create(ctx context.Context, req resource.CreateRequest,
 	diags = resp.State.Set(ctx, &scriptResourceData{
 		Id:               basetypes.NewStringValue(resultUuid.String()),
 		Uuid:             basetypes.NewStringValue(resultUuid.String()),
-		ScriptGroupUuid:  data.ScriptGroupUuid,
+		ScriptGroupID:    data.ScriptGroupID,
 		AltID:            data.AltID,
 		Name:             data.Name,
 		Description:      data.Description,
@@ -195,11 +224,14 @@ func (e *scriptResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	s := e.provider.Client.Script(
-		data.ScriptGroupUuid.ValueString(),
-		data.AltID.ValueString(),
-	)
-	profile, err := s.Read(ctx)
+	if err := e.MakeClient(ctx, data.ProviderID.ValueString(), data.ScriptGroupID.ValueString(), data.AltID.ValueString()); err != nil {
+		resp.Diagnostics.AddError(
+			"failed to create client",
+			err.Error(),
+		)
+	}
+
+	profile, err := e.script.Read(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"failed to get script profile",
@@ -211,7 +243,7 @@ func (e *scriptResource) Read(ctx context.Context, req resource.ReadRequest, res
 	diags = resp.State.Set(ctx, &scriptResourceData{
 		Id:               basetypes.NewStringValue(profile.Uuid.String()),
 		Uuid:             basetypes.NewStringValue(profile.Uuid.String()),
-		ScriptGroupUuid:  data.ScriptGroupUuid,
+		ScriptGroupID:    data.ScriptGroupID,
 		AltID:            data.AltID,
 		Name:             basetypes.NewStringValue(profile.Name),
 		Description:      basetypes.NewStringValue(profile.Description),
@@ -235,11 +267,14 @@ func (e *scriptResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	s := e.provider.Client.Script(
-		data.ScriptGroupUuid.ValueString(),
-		data.AltID.ValueString(),
-	)
-	resultUuid, err := s.Update(ctx, sdk.ScriptInput{
+	if err := e.MakeClient(ctx, data.ProviderID.ValueString(), data.ScriptGroupID.ValueString(), data.AltID.ValueString()); err != nil {
+		resp.Diagnostics.AddError(
+			"failed to create client",
+			err.Error(),
+		)
+	}
+
+	resultUuid, err := e.script.Update(ctx, sdk.ScriptInput{
 		AltID:            data.AltID.ValueString(),
 		Name:             data.Name.ValueString(),
 		Description:      data.Description.ValueString(),
@@ -260,7 +295,7 @@ func (e *scriptResource) Update(ctx context.Context, req resource.UpdateRequest,
 	diags = resp.State.Set(ctx, &scriptResourceData{
 		Id:               basetypes.NewStringValue(resultUuid.String()),
 		Uuid:             basetypes.NewStringValue(resultUuid.String()),
-		ScriptGroupUuid:  data.ScriptGroupUuid,
+		ScriptGroupID:  data.ScriptGroupID,
 		AltID:            data.AltID,
 		Name:             data.Name,
 		Description:      data.Description,
@@ -283,11 +318,14 @@ func (e *scriptResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	s := e.provider.Client.Script(
-		data.ScriptGroupUuid.ValueString(),
-		data.AltID.ValueString(),
-	)
-	err := s.Delete(ctx)
+	if err := e.MakeClient(ctx, data.ProviderID.ValueString(), data.ScriptGroupID.ValueString(), data.AltID.ValueString()); err != nil {
+		resp.Diagnostics.AddError(
+			"failed to create client",
+			err.Error(),
+		)
+	}
+
+	err := e.script.Delete(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"failed to delete script",

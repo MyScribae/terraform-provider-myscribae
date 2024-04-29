@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -10,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	sdk "github.com/myscribae/myscribae-sdk-go"
+	"github.com/myscribae/myscribae-sdk-go/provider"
 	"github.com/myscribae/myscribae-terraform-provider/validators"
 )
 
@@ -17,16 +19,34 @@ var _ resource.Resource = (*scriptGroupResource)(nil)
 var _ resource.ResourceWithConfigure = (*scriptGroupResource)(nil)
 
 type scriptGroupResource struct {
-	provider *myScribaeProvider
+	terraformProvider *myScribaeProvider
+	myscribaeProvider *provider.Provider
+	scriptGroup       *provider.ScriptGroup
 }
 
 type scriptGroupResourceData struct {
+	ProviderId  types.String `tfsdk:"provider_id"`
 	Id          types.String `tfsdk:"id"`
 	Uuid        types.String `tfsdk:"uuid"`
 	AltID       types.String `tfsdk:"alt_id"`
 	Name        types.String `tfsdk:"name"`
 	Description types.String `tfsdk:"description"`
 	Public      types.Bool   `tfsdk:"public"`
+}
+
+func (e *scriptGroupResource) MakeClient(ctx context.Context, providerId string, altId string) error {
+	providerUuid, err := uuid.Parse(providerId)
+	if err != nil {
+		return err
+	}
+
+	e.myscribaeProvider = &provider.Provider{
+		Uuid:   providerUuid,
+		Client: e.terraformProvider.Client,
+	}
+	e.scriptGroup = e.myscribaeProvider.ScriptGroup(altId)
+
+	return nil
 }
 
 func newScriptGroupResource() resource.Resource {
@@ -43,7 +63,7 @@ func (e *scriptGroupResource) Configure(ctx context.Context, req resource.Config
 	}
 
 	prov := req.ProviderData.(*myScribaeProvider)
-	e.provider = prov
+	e.terraformProvider = prov
 }
 
 func (e *scriptGroupResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -91,9 +111,12 @@ func (e *scriptGroupResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	sg := e.provider.Client.ScriptGroup(data.AltID.ValueString())
+	if err := e.MakeClient(ctx, data.ProviderId.ValueString(), data.AltID.ValueString()); err != nil {
+		resp.Diagnostics.AddError("failed to create script group: %s", err.Error())
+		return
+	}
 
-	resultUuid, err := sg.Create(ctx, sdk.ScriptGroupInput{
+	resultUuid, err := e.scriptGroup.Create(ctx, sdk.ScriptGroupInput{
 		Name:        data.Name.ValueString(),
 		Description: data.Description.ValueString(),
 		Public:      data.Public.ValueBool(),
@@ -126,10 +149,13 @@ func (e *scriptGroupResource) Read(ctx context.Context, req resource.ReadRequest
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+	if err := e.MakeClient(ctx, data.ProviderId.ValueString(), data.AltID.ValueString()); err != nil {
+		resp.Diagnostics.AddError("failed to create script group: %s", err.Error())
+		return
+	}
 
-	sg := e.provider.Client.ScriptGroup(data.AltID.ValueString())
 	// Set the data in the response
-	profile, err := sg.Read(ctx)
+	profile, err := e.scriptGroup.Read(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to get script group: %s", err.Error())
 		return
@@ -157,8 +183,12 @@ func (e *scriptGroupResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	sg := e.provider.Client.ScriptGroup(data.AltID.ValueString())
-	resultUuid, err := sg.Update(ctx, sdk.ScriptGroupInput{
+	if err := e.MakeClient(ctx, data.ProviderId.ValueString(), data.AltID.ValueString()); err != nil {
+		resp.Diagnostics.AddError("failed to create script group: %s", err.Error())
+		return
+	}
+
+	resultUuid, err := e.scriptGroup.Update(ctx, sdk.ScriptGroupInput{
 		Name:        data.Name.ValueString(),
 		Description: data.Description.ValueString(),
 		Public:      data.Public.ValueBool(),
@@ -186,8 +216,12 @@ func (e *scriptGroupResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	sg := e.provider.Client.ScriptGroup(data.AltID.ValueString())
-	_, err := sg.Update(ctx, sdk.ScriptGroupInput{
+	if err := e.MakeClient(ctx, data.ProviderId.ValueString(), data.AltID.ValueString()); err != nil {
+		resp.Diagnostics.AddError("failed to create script group: %s", err.Error())
+		return
+	}
+
+	_, err := e.scriptGroup.Update(ctx, sdk.ScriptGroupInput{
 		Public: false,
 	})
 	if err != nil {
