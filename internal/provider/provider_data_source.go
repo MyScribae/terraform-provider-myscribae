@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	sdk "github.com/myscribae/myscribae-sdk-go"
@@ -18,8 +19,8 @@ type mysribaeProviderDataSource struct {
 }
 
 type myscribaeProviderDataSourceInput struct {
-	ApiKey    string `tfsdk:"api_key"`
-	SecretKey string `tfsdk:"secret_key"`
+	ApiKey    types.String `tfsdk:"api_key"`
+	SecretKey types.String `tfsdk:"secret_key"`
 }
 
 var _ datasource.DataSource = (*mysribaeProviderDataSource)(nil)
@@ -90,8 +91,8 @@ func (e *mysribaeProviderDataSource) Read(ctx context.Context, req datasource.Re
 
 	e.myscribaeProvider, err = sdk.NewProvider(provider.ProviderConfig{
 		ApiToken:  &e.terraformProvider.ApiToken,
-		ApiKey:    &input.ApiKey,
-		SecretKey: &input.SecretKey,
+		ApiKey:    input.ApiKey.ValueStringPointer(),
+		SecretKey: input.SecretKey.ValueStringPointer(),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError("error creating provider client", err.Error())
@@ -107,8 +108,8 @@ func (e *mysribaeProviderDataSource) Read(ctx context.Context, req datasource.Re
 	state := myscribaeProviderResourceData{
 		Id:        basetypes.NewStringValue(profile.Uuid.String()),
 		Uuid:      basetypes.NewStringValue(profile.Uuid.String()),
-		SecretKey: basetypes.NewStringPointerValue(&input.SecretKey),
-		ApiKey:    basetypes.NewStringValue(input.ApiKey),
+		SecretKey: input.SecretKey,
+		ApiKey:    input.ApiKey,
 		myscribaeProviderPlanData: myscribaeProviderPlanData{
 			Name:           basetypes.NewStringValue(profile.Name),
 			AltID:          basetypes.NewStringPointerValue(profile.AltID),

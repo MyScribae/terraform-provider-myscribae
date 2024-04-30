@@ -6,9 +6,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/myscribae/myscribae-sdk-go/provider"
 )
+
+var _ datasource.DataSource = (*scriptGroupDataSource)(nil)
+var _ datasource.DataSourceWithConfigure = (*scriptGroupDataSource)(nil)
 
 type scriptGroupDataSource struct {
 	terraformProvider *myScribaeProvider
@@ -16,8 +20,10 @@ type scriptGroupDataSource struct {
 	scriptGroup       *provider.ScriptGroup
 }
 
-var _ datasource.DataSource = (*scriptGroupDataSource)(nil)
-var _ datasource.DataSourceWithConfigure = (*scriptGroupDataSource)(nil)
+type scriptGroupResourceConfig struct {
+	ProviderID types.String `tfsdk:"provider_id"`
+	AltID      types.String `tfsdk:"alt_id"`
+}
 
 func newScriptGroupDataSource() datasource.DataSource {
 	return &scriptGroupDataSource{}
@@ -34,11 +40,6 @@ func (e *scriptGroupDataSource) Configure(ctx context.Context, req datasource.Co
 
 	prov := req.ProviderData.(*myScribaeProvider)
 	e.terraformProvider = prov
-}
-
-type scriptGroupResourceConfig struct {
-	ProviderID string `tfsdk:"provider_id"`
-	AltID      string `tfsdk:"alt_id"`
 }
 
 func (e *scriptGroupDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {

@@ -13,6 +13,8 @@ import (
 	"github.com/myscribae/myscribae-sdk-go/gql"
 )
 
+var _ provider.Provider = (*myScribaeProvider)(nil)
+
 type myScribaeProvider struct {
 	ApiToken string
 	ApiUrl   string
@@ -21,10 +23,8 @@ type myScribaeProvider struct {
 }
 
 type myScribaeProviderConfig struct {
-	ApiToken types.String
+	ApiToken types.String `tfsdk:"api_token"`
 }
-
-var _ provider.Provider = (*myScribaeProvider)(nil)
 
 func New(version string) func() provider.Provider {
 	return func() provider.Provider {
