@@ -54,7 +54,12 @@ func (e *scriptResource) Configure(ctx context.Context, req resource.ConfigureRe
 		return
 	}
 
-	prov := req.ProviderData.(*myScribaeProvider)
+	prov, ok := req.ProviderData.(*myScribaeProvider)
+	if !ok {
+		resp.Diagnostics.AddError("invalid provider data", "expected *myScribaeProvider")
+		return
+	}
+
 	e.terraformProvider = prov
 }
 
@@ -295,7 +300,7 @@ func (e *scriptResource) Update(ctx context.Context, req resource.UpdateRequest,
 	diags = resp.State.Set(ctx, &scriptResourceData{
 		Id:               basetypes.NewStringValue(resultUuid.String()),
 		Uuid:             basetypes.NewStringValue(resultUuid.String()),
-		ScriptGroupID:  data.ScriptGroupID,
+		ScriptGroupID:    data.ScriptGroupID,
 		AltID:            data.AltID,
 		Name:             data.Name,
 		Description:      data.Description,

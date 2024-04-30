@@ -59,7 +59,12 @@ func (e *myscribaeProviderResource) Configure(ctx context.Context, req resource.
 		return
 	}
 
-	e.terraformProvider = req.ProviderData.(*myScribaeProvider)
+	prov, ok := req.ProviderData.(*myScribaeProvider)
+	if !ok {
+		resp.Diagnostics.AddError("invalid provider data", "expected *myScribaeProvider")
+		return
+	}
+	e.terraformProvider = prov
 }
 
 func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -186,7 +191,14 @@ func (e *myscribaeProviderResource) Create(ctx context.Context, req resource.Cre
 		}
 	} else {
 		// take over this provider
-		e.MakeClient(ctx, planData.Uuid.ValueString())
+		err = e.MakeClient(ctx, planData.Uuid.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"failed to make client",
+				err.Error(),
+			)
+			return
+		}
 
 		_, err = e.myscribaeProvider.Update(ctx, sdk.ProviderProfileInput{
 			AltID:          planData.AltID.ValueStringPointer(),
@@ -250,7 +262,13 @@ func (e *myscribaeProviderResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	e.MakeClient(ctx, currentState.Id.ValueString())
+	if err := e.MakeClient(ctx, currentState.Id.ValueString()); err != nil {
+		resp.Diagnostics.AddError(
+			"failed to make client",
+			err.Error(),
+		)
+		return
+	}
 
 	profile, err := e.myscribaeProvider.Read(ctx)
 	if err != nil {

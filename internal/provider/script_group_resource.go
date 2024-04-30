@@ -62,7 +62,11 @@ func (e *scriptGroupResource) Configure(ctx context.Context, req resource.Config
 		return
 	}
 
-	prov := req.ProviderData.(*myScribaeProvider)
+	prov, ok := req.ProviderData.(*myScribaeProvider)
+	if !ok {
+		resp.Diagnostics.AddError("invalid provider data", "expected *myScribaeProvider")
+		return
+	}
 	e.terraformProvider = prov
 }
 

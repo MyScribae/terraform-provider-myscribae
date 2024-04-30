@@ -39,7 +39,12 @@ func (e *scriptDataSource) Configure(ctx context.Context, req datasource.Configu
 		return
 	}
 
-	prov := req.ProviderData.(*myScribaeProvider)
+	prov, ok := req.ProviderData.(*myScribaeProvider)
+	if !ok {
+		resp.Diagnostics.AddError("invalid provider data", "expected *myScribaeProvider")
+		return
+	}
+
 	e.terraformProvider = prov
 }
 
