@@ -28,16 +28,20 @@ resource "myscribae_provider" "example" {
 
 ### Required
 
-- `account_service` (Boolean) The account service status of the provider
 - `description` (String) The description of the provider
 - `name` (String) The name of the provider
-- `public` (Boolean) The public status of the provider
 
 ### Optional
 
+- `account_service` (Boolean) The account service status of the provider
 - `alt_id` (String) The alt id of the provider
 - `banner_url` (String) The banner url of the provider
 - `color` (String) The color of the provider
 - `logo_url` (String) The logo url of the provider
+- `public` (Boolean) The public status of the provider
 - `url` (String) The url of the provider
 - `uuid` (String) The uuid of the provider
+
+### Read-Only
+
+- `id` (String) The id of the provider

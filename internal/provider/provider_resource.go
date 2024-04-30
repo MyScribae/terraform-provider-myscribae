@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -134,12 +133,10 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 			"public": schema.BoolAttribute{
 				Description: "The public status of the provider",
 				Optional:    true,
-				Default:     booldefault.StaticBool(false),
 			},
 			"account_service": schema.BoolAttribute{
 				Description: "The account service status of the provider",
 				Optional:    true,
-				Default:     booldefault.StaticBool(false),
 			},
 		},
 	}

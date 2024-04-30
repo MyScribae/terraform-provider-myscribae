@@ -30,6 +30,7 @@ resource "myscribae_script_group" "example" {
 - `alt_id` (String) The alt id of the script group
 - `description` (String) The description of the script group
 - `name` (String) The name of the script group
+- `provider_id` (String) The provider id of the script group
 - `public` (Boolean) Is the script group public
 
 ### Read-Only
