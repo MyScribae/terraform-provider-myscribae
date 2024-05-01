@@ -202,10 +202,10 @@ func (e *scriptGroupResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	resultUuid, err := e.scriptGroup.Update(ctx, sdk.ScriptGroupInput{
-		Name:        data.Name.ValueString(),
-		Description: data.Description.ValueString(),
-		Public:      data.Public.ValueBool(),
+	resultUuid, err := e.scriptGroup.Update(ctx, provider.UpdateScriptGroupInput{
+		Name:        data.Name.ValueStringPointer(),
+		Description: data.Description.ValueStringPointer(),
+		Public:      data.Public.ValueBoolPointer(),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError("failed to update script group: %s", err.Error())
@@ -235,8 +235,9 @@ func (e *scriptGroupResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	_, err := e.scriptGroup.Update(ctx, sdk.ScriptGroupInput{
-		Public: false,
+	var public = false
+	_, err := e.scriptGroup.Update(ctx, provider.UpdateScriptGroupInput{
+		Public: &public,
 	})
 	if err != nil {
 		resp.Diagnostics.AddError("failed to delete script group: %s", err.Error())

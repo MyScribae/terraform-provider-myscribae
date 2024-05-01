@@ -35,7 +35,6 @@ func New(version string) func() provider.Provider {
 }
 
 func (p *myScribaeProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	// apiKey := os.Getenv("MYSCRIBAE_API_KEY")
 	apiUrl := os.Getenv("MYSCRIBAE_API_URL")
 	apiToken := os.Getenv("MYSCRIBAE_API_TOKEN")
 	var cfg myScribaeProviderConfig

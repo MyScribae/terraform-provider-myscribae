@@ -137,6 +137,10 @@ github.com/mitchellh/reflectwalk v1.0.2 h1:G2LzWKi524PWgd3mLHV8Y5k7s6XUvT0Gef6zx
 github.com/mitchellh/reflectwalk v1.0.2/go.mod h1:mSTlrgnPZtwu0c4WaC2kGObEpuNDbx0jmZXqmk4esnw=
 github.com/myscribae/myscribae-sdk-go v0.0.3 h1:850BDfT6RE7Hw9QkXIZcVq2GPes6TbGbg4uDysM1OO8=
 github.com/myscribae/myscribae-sdk-go v0.0.3/go.mod h1:1sZNc52Ft3EuiQFkC2vYSGv2ova0v5QpBRYJXoQMgjI=
+github.com/myscribae/myscribae-sdk-go v0.0.4 h1:vLBqhigl65vfEiDXUzQfJHJJ/YXwSpHBxjqsOmnF1xM=
+github.com/myscribae/myscribae-sdk-go v0.0.4/go.mod h1:1sZNc52Ft3EuiQFkC2vYSGv2ova0v5QpBRYJXoQMgjI=
+github.com/myscribae/myscribae-sdk-go v0.0.5 h1:dNQ8asP9QNrHZjVA8kOOKh0VWCnFpkys/MEbMScQOUo=
+github.com/myscribae/myscribae-sdk-go v0.0.5/go.mod h1:1sZNc52Ft3EuiQFkC2vYSGv2ova0v5QpBRYJXoQMgjI=
 github.com/oklog/run v1.0.0 h1:Ru7dDtJNOyC66gQ5dQmaCa0qIsAUFY3sFpK1Xk8igrw=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/pjbgf/sha1cd v0.3.0 h1:4D5XXmUUBUl/xQ6IjCkEAbqXskkq/4O7LmGn0AqMDs4=

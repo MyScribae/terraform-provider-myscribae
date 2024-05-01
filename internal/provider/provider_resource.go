@@ -185,7 +185,7 @@ func (e *myscribaeProviderResource) Create(ctx context.Context, req resource.Cre
 		e.myscribaeProvider, err = provider.CreateNewProvider(
 			ctx,
 			e.terraformProvider.Client,
-			&provider.ProviderProfileInput{
+			&provider.CreateProviderProfileInput{
 				AltID:          planData.AltID.ValueStringPointer(),
 				Name:           planData.Name.ValueString(),
 				Description:    planData.Description.ValueString(),
@@ -219,16 +219,16 @@ func (e *myscribaeProviderResource) Create(ctx context.Context, req resource.Cre
 			return
 		}
 
-		_, err = e.myscribaeProvider.Update(ctx, sdk.ProviderProfileInput{
+		_, err = e.myscribaeProvider.Update(ctx, provider.UpdateProviderProfileInput{
 			AltID:          planData.AltID.ValueStringPointer(),
-			Name:           planData.Name.ValueString(),
-			Description:    planData.Description.ValueString(),
+			Name:           planData.Name.ValueStringPointer(),
+			Description:    planData.Description.ValueStringPointer(),
 			LogoUrl:        planData.LogoUrl.ValueStringPointer(),
 			BannerUrl:      planData.BannerUrl.ValueStringPointer(),
 			Url:            planData.Url.ValueStringPointer(),
 			Color:          planData.Color.ValueStringPointer(),
-			Public:         planData.Public.ValueBool(),
-			AccountService: planData.AccountService.ValueBool(),
+			Public:         planData.Public.ValueBoolPointer(),
+			AccountService: planData.AccountService.ValueBoolPointer(),
 		})
 		if err != nil {
 			resp.Diagnostics.AddError(
@@ -340,16 +340,16 @@ func (e *myscribaeProviderResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	resultUuid, err := e.myscribaeProvider.Update(ctx, sdk.ProviderProfileInput{
+	resultUuid, err := e.myscribaeProvider.Update(ctx, provider.UpdateProviderProfileInput{
 		AltID:          planData.AltID.ValueStringPointer(),
-		Name:           planData.Name.ValueString(),
-		Description:    planData.Description.ValueString(),
+		Name:           planData.Name.ValueStringPointer(),
+		Description:    planData.Description.ValueStringPointer(),
 		LogoUrl:        planData.LogoUrl.ValueStringPointer(),
 		BannerUrl:      planData.BannerUrl.ValueStringPointer(),
 		Url:            planData.Url.ValueStringPointer(),
 		Color:          planData.Color.ValueStringPointer(),
-		Public:         planData.Public.ValueBool(),
-		AccountService: planData.AccountService.ValueBool(),
+		Public:         planData.Public.ValueBoolPointer(),
+		AccountService: planData.AccountService.ValueBoolPointer(),
 	})
 
 	if err != nil {

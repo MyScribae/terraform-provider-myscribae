@@ -285,15 +285,19 @@ func (e *scriptResource) Update(ctx context.Context, req resource.UpdateRequest,
 		)
 	}
 
-	resultUuid, err := e.script.Update(ctx, sdk.ScriptInput{
-		AltID:            data.AltID.ValueString(),
-		Name:             data.Name.ValueString(),
-		Description:      data.Description.ValueString(),
-		Recurrence:       data.Recurrence.ValueString(),
-		PriceInCents:     int(data.PriceInCents.ValueInt64()),
-		SlaSec:           int(data.SlaSec.ValueInt64()),
-		TokenLifetimeSec: int(data.TokenLifetimeSec.ValueInt64()),
-		Public:           data.Public.ValueBool(),
+	var (
+		priceInCents int = int(data.PriceInCents.ValueInt64())
+		slaSec int = int(data.SlaSec.ValueInt64())
+		tokenLifetimeSec int = int(data.TokenLifetimeSec.ValueInt64())
+	)
+
+	resultUuid, err := e.script.Update(ctx, provider.UpdateScriptInput{
+		Name:             data.Name.ValueStringPointer(),
+		Description:      data.Description.ValueStringPointer(),
+		PriceInCents:     &priceInCents,
+		SlaSec:           &slaSec,
+		TokenLifetimeSec: &tokenLifetimeSec,
+		Public:           data.Public.ValueBoolPointer(),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(
