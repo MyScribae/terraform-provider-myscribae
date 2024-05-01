@@ -111,7 +111,7 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 				Optional:    true,
 				Required:    false,
 				Validators: []validator.String{
-					validators.NewUrlValidator(),
+					validators.NewUrlValidator(false),
 				},
 			},
 			"banner_url": schema.StringAttribute{
@@ -119,14 +119,15 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 				Optional:    true,
 				Required:    false,
 				Validators: []validator.String{
-					validators.NewUrlValidator(),
+					validators.NewUrlValidator(false),
 				},
 			},
 			"url": schema.StringAttribute{
 				Description: "The url of the provider",
 				Optional:    true,
+				Required:    false,
 				Validators: []validator.String{
-					validators.NewUrlValidator(),
+					validators.NewUrlValidator(false),
 				},
 			},
 			"color": schema.StringAttribute{

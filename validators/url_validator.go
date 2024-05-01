@@ -8,24 +8,27 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
-type urlValidator struct{}
+type urlValidator struct {
+	Required bool
+}
 
-func NewUrlValidator() validator.String {
-	return &urlValidator{}
+func NewUrlValidator(required bool) validator.String {
+	return &urlValidator{
+		Required: required,
+	}
 }
 
 func (u *urlValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
-	val := req.ConfigValue.ValueString()
+	val := req.ConfigValue.ValueStringPointer()
 
-	if val == "" {
+	if val != nil && *val != "" {
+		_, err := url.ParseRequestURI(*val)
+		if err != nil {
+			resp.Diagnostics.AddError("invalid url", fmt.Sprintf("invalid url: %s", err.Error()))
+			return
+		}
+	} else if u.Required {
 		resp.Diagnostics.AddError("url cannot be empty", "url provided is empty")
-		return
-	}
-
-	_, err := url.ParseRequestURI(val)
-	if err != nil {
-		resp.Diagnostics.AddError("invalid url", fmt.Sprintf("invalid url: %s", err.Error()))
-		return
 	}
 }
 
