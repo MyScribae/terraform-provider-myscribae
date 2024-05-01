@@ -81,6 +81,12 @@ func (e *scriptGroupResource) Schema(ctx context.Context, req resource.SchemaReq
 				Description: "The provider id of the script group",
 				Required:    true,
 			},
+			"uuid": schema.StringAttribute{
+				Description: "The uuid of the script",
+				Computed:    true,
+				Required:    false,
+				Optional:    false,
+			},
 			"alt_id": schema.StringAttribute{
 				Description: "The alt id of the script group",
 				Required:    true,

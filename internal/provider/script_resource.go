@@ -84,14 +84,14 @@ func (e *scriptResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				Description: "The provider id of the script",
 				Required:    true,
 				Validators: []validator.String{
-					validators.NewUuidValidator(),
+					validators.NewUuidValidator(true),
 				},
 			},
 			"script_group_id": schema.StringAttribute{
 				Description: "The script group uuid",
 				Required:    true,
 				Validators: []validator.String{
-					validators.NewUuidValidator(),
+					validators.NewUuidValidator(true),
 				},
 			},
 			"alt_id": schema.StringAttribute{
@@ -100,6 +100,12 @@ func (e *scriptResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				Validators: []validator.String{
 					validators.NewAltIdValidator(),
 				},
+			},
+			"uuid": schema.StringAttribute{
+				Description: "The uuid of the script",
+				Computed:    true,
+				Required:    false,
+				Optional:    false,
 			},
 			"name": schema.StringAttribute{
 				Description: "The name of the script",

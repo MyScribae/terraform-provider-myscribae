@@ -8,26 +8,29 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
-type uuidValidator struct{}
+type uuidValidator struct {
+	Required bool
+}
 
 var _ validator.String = (*uuidValidator)(nil)
 
-func NewUuidValidator() validator.String {
-	return &uuidValidator{}
+func NewUuidValidator(required bool) validator.String {
+	return &uuidValidator{
+		Required: required,
+	}
 }
 
 func (u *uuidValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
-	val := req.ConfigValue.ValueString()
+	val := req.ConfigValue.ValueStringPointer()
 
-	if val == "" {
+	if val != nil && *val != "" {
+		_, err := uuid.Parse(*val)
+		if err != nil {
+			resp.Diagnostics.AddError("invalid uuid", fmt.Sprintf("invalid uuid: %s", err.Error()))
+			return
+		}
+	} else if u.Required {
 		resp.Diagnostics.AddError("uuid cannot be empty", "uuid provided is empty")
-		return
-	}
-
-	_, err := uuid.Parse(val)
-	if err != nil {
-		resp.Diagnostics.AddError("invalid uuid", fmt.Sprintf("invalid uuid: %s", err.Error()))
-		return
 	}
 }
 

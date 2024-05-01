@@ -36,3 +36,4 @@ resource "myscribae_script_group" "example" {
 ### Read-Only
 
 - `id` (String) The id of the script group
+- `uuid` (String) The uuid of the script

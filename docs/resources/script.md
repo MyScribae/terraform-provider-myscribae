@@ -42,3 +42,7 @@ resource "myscribae_script" "example" {
 - `script_group_id` (String) The script group uuid
 - `sla_sec` (Number) The SLA in seconds of the script (minimum 2400)
 - `token_lifetime_sec` (Number) The token lifetime in seconds of the script (minimum 600)
+
+### Read-Only
+
+- `uuid` (String) The uuid of the script

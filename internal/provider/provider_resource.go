@@ -89,7 +89,7 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 				Computed:    true,
 				Required:    false,
 				Validators: []validator.String{
-					validators.NewUuidValidator(),
+					validators.NewUuidValidator(false),
 				},
 			},
 			"name": schema.StringAttribute{
