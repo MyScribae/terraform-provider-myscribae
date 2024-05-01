@@ -129,6 +129,7 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 			"color": schema.StringAttribute{
 				Description: "The color of the provider",
 				Optional:    true,
+				Computed:    true,
 				Default:     stringdefault.StaticString("#A0A0A0"),
 				Validators: []validator.String{
 					validators.NewColorValidator(),
@@ -137,11 +138,13 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 			"public": schema.BoolAttribute{
 				Description: "The public status of the provider",
 				Optional:    true,
+				Computed:    true,
 				Default:     booldefault.StaticBool(true),
 			},
 			"account_service": schema.BoolAttribute{
 				Description: "The account service status of the provider",
 				Optional:    true,
+				Computed:    true,
 				Default:     booldefault.StaticBool(true),
 			},
 		},
