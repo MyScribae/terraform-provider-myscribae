@@ -286,8 +286,8 @@ func (e *scriptResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	var (
-		priceInCents int = int(data.PriceInCents.ValueInt64())
-		slaSec int = int(data.SlaSec.ValueInt64())
+		priceInCents     int = int(data.PriceInCents.ValueInt64())
+		slaSec           int = int(data.SlaSec.ValueInt64())
 		tokenLifetimeSec int = int(data.TokenLifetimeSec.ValueInt64())
 	)
 
