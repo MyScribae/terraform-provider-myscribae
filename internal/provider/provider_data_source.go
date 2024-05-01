@@ -111,11 +111,11 @@ func (e *mysribaeProviderDataSource) Read(ctx context.Context, req datasource.Re
 	}
 
 	state := myscribaeProviderResourceData{
-		Id:        basetypes.NewStringValue(profile.Uuid.String()),
-		Uuid:      basetypes.NewStringValue(profile.Uuid.String()),
 		SecretKey: input.SecretKey,
 		ApiKey:    input.ApiKey,
 		myscribaeProviderPlanData: myscribaeProviderPlanData{
+			Id:             basetypes.NewStringValue(profile.Uuid.String()),
+			Uuid:           basetypes.NewStringValue(profile.Uuid.String()),
 			Name:           basetypes.NewStringValue(profile.Name),
 			AltID:          basetypes.NewStringPointerValue(profile.AltID),
 			Description:    basetypes.NewStringValue(profile.Description),

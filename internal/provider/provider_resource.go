@@ -28,6 +28,7 @@ type myscribaeProviderResource struct {
 }
 
 type myscribaeProviderPlanData struct {
+	Id             types.String `tfsdk:"id"`
 	Name           types.String `tfsdk:"name"`
 	AltID          types.String `tfsdk:"alt_id"`
 	Uuid           types.String `tfsdk:"uuid"`
@@ -42,8 +43,6 @@ type myscribaeProviderPlanData struct {
 
 type myscribaeProviderResourceData struct {
 	myscribaeProviderPlanData
-	Id        types.String `tfsdk:"id"`
-	Uuid      types.String `tfsdk:"uuid"`
 	SecretKey types.String `tfsdk:"secret_key"`
 	ApiKey    types.String `tfsdk:"api_key"`
 }
@@ -206,6 +205,9 @@ func (e *myscribaeProviderResource) Create(ctx context.Context, req resource.Cre
 			)
 			return
 		}
+
+		planData.Uuid = basetypes.NewStringValue(e.myscribaeProvider.Uuid.String())
+		planData.Id = basetypes.NewStringValue(e.myscribaeProvider.Uuid.String())
 	} else {
 		// take over this provider
 		err = e.MakeClient(ctx, planData.Uuid.ValueString())
@@ -259,8 +261,6 @@ func (e *myscribaeProviderResource) Create(ctx context.Context, req resource.Cre
 
 	state := myscribaeProviderResourceData{
 		myscribaeProviderPlanData: planData,
-		Id:                        basetypes.NewStringValue(e.myscribaeProvider.Uuid.String()),
-		Uuid:                      basetypes.NewStringValue(e.myscribaeProvider.Uuid.String()),
 		SecretKey:                 basetypes.NewStringPointerValue(e.myscribaeProvider.SecretKey),
 		ApiKey:                    basetypes.NewStringPointerValue(e.myscribaeProvider.ApiKey),
 	}
@@ -299,9 +299,9 @@ func (e *myscribaeProviderResource) Read(ctx context.Context, req resource.ReadR
 	newState := myscribaeProviderResourceData{
 		SecretKey: currentState.SecretKey,
 		ApiKey:    currentState.ApiKey,
-		Id:        basetypes.NewStringValue(profile.Uuid.String()),
-		Uuid:      basetypes.NewStringValue(profile.Uuid.String()),
 		myscribaeProviderPlanData: myscribaeProviderPlanData{
+			Id:             basetypes.NewStringValue(profile.Uuid.String()),
+			Uuid:           basetypes.NewStringValue(profile.Uuid.String()),
 			Name:           basetypes.NewStringValue(profile.Name),
 			AltID:          basetypes.NewStringPointerValue(profile.AltID),
 			Description:    basetypes.NewStringValue(profile.Description),
@@ -360,9 +360,9 @@ func (e *myscribaeProviderResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
+	planData.Id = basetypes.NewStringValue(resultUuid.String())
+	planData.Uuid = basetypes.NewStringValue(resultUuid.String())
 	newState := myscribaeProviderResourceData{
-		Id:                        basetypes.NewStringValue(resultUuid.String()),
-		Uuid:                      basetypes.NewStringValue(resultUuid.String()),
 		SecretKey:                 currentState.SecretKey,
 		ApiKey:                    currentState.ApiKey,
 		myscribaeProviderPlanData: planData,
