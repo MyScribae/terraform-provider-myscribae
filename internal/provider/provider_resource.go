@@ -87,6 +87,7 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 				Description: "The uuid of the provider",
 				Optional:    true,
 				Computed:    true,
+				Required:    false,
 				Validators: []validator.String{
 					validators.NewUuidValidator(),
 				},
@@ -108,6 +109,7 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 			"logo_url": schema.StringAttribute{
 				Description: "The logo url of the provider",
 				Optional:    true,
+				Required:    false,
 				Validators: []validator.String{
 					validators.NewUrlValidator(),
 				},
@@ -115,6 +117,7 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 			"banner_url": schema.StringAttribute{
 				Description: "The banner url of the provider",
 				Optional:    true,
+				Required:    false,
 				Validators: []validator.String{
 					validators.NewUrlValidator(),
 				},
