@@ -76,6 +76,7 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 			"alt_id": schema.StringAttribute{
 				Description: "The alt id of the provider",
 				Optional:    true,
+				Required:    false,
 				Validators: []validator.String{
 					validators.NewAltIdValidator(),
 				},
