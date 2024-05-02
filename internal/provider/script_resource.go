@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"math"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -12,8 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	sdk "github.com/myscribae/myscribae-sdk-go"
 	"github.com/myscribae/myscribae-sdk-go/provider"
+	"github.com/myscribae/myscribae-sdk-go/utilities"
 	"github.com/myscribae/myscribae-terraform-provider/validators"
 )
 
@@ -68,11 +69,20 @@ func (e *scriptResource) MakeClient(ctx context.Context, providerId string, scri
 	if err != nil {
 		return err
 	}
+
+	scriptGroupAltID, err := utilities.NewAltUUID(scriptGroupId)
+	if err != nil {
+		return err
+	}
+
 	e.myscribaeProvider = &provider.Provider{
 		Uuid:   providerUuid,
 		Client: e.terraformProvider.Client,
 	}
-	e.script = e.myscribaeProvider.Script(scriptGroupId, altId)
+	e.script, err = e.myscribaeProvider.Script(scriptGroupAltID, altId)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -192,13 +202,48 @@ func (e *scriptResource) Create(ctx context.Context, req resource.CreateRequest,
 		)
 	}
 
-	resultUuid, err := e.script.Create(ctx, sdk.ScriptInput{
+	recurrence, err := utilities.NewRecurrence(data.Recurrence.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"failed to parse recurrence",
+			err.Error(),
+		)
+		return
+	}
+
+	priceInCents := uint64(data.PriceInCents.ValueInt64())
+	if priceInCents > math.MaxUint32 {
+		resp.Diagnostics.AddError(
+			"price_in_cents is too large",
+			"price_in_cents must be less than 4294967296",
+		)
+		return
+	}
+
+	slaSec := data.SlaSec.ValueInt64()
+	if slaSec > math.MaxUint32 {
+		resp.Diagnostics.AddError(
+			"sla_sec is too large",
+			"sla_sec must be less than 4294967296",
+		)
+		return
+	}
+
+	tokenLifetimeSec := data.TokenLifetimeSec.ValueInt64()
+	if tokenLifetimeSec > math.MaxUint32 {
+		resp.Diagnostics.AddError(
+			"token_lifetime_sec is too large",
+			"token_lifetime_sec must be less than 4294967296",
+		)
+	}
+
+	resultUuid, err := e.script.Create(ctx, provider.CreateScriptInput{
 		Name:             data.Name.ValueString(),
 		Description:      data.Description.ValueString(),
-		Recurrence:       data.Recurrence.ValueString(),
-		PriceInCents:     int(data.PriceInCents.ValueInt64()),
-		SlaSec:           int(data.SlaSec.ValueInt64()),
-		TokenLifetimeSec: int(data.TokenLifetimeSec.ValueInt64()),
+		Recurrence:       *recurrence,
+		PriceInCents:     utilities.NewCentValue(uint(priceInCents)),
+		SlaSec:           utilities.NewUInt(uint(slaSec)),
+		TokenLifetimeSec: utilities.NewUInt(uint(tokenLifetimeSec)),
 		Public:           data.Public.ValueBool(),
 	})
 	if err != nil {
@@ -285,18 +330,44 @@ func (e *scriptResource) Update(ctx context.Context, req resource.UpdateRequest,
 		)
 	}
 
+	priceInCents := uint64(data.PriceInCents.ValueInt64())
+	if priceInCents > math.MaxUint32 {
+		resp.Diagnostics.AddError(
+			"price_in_cents is too large",
+			"price_in_cents must be less than 4294967296",
+		)
+		return
+	}
+
+	slaSec := data.SlaSec.ValueInt64()
+	if slaSec > math.MaxUint32 {
+		resp.Diagnostics.AddError(
+			"sla_sec is too large",
+			"sla_sec must be less than 4294967296",
+		)
+		return
+	}
+
+	tokenLifetimeSec := data.TokenLifetimeSec.ValueInt64()
+	if tokenLifetimeSec > math.MaxUint32 {
+		resp.Diagnostics.AddError(
+			"token_lifetime_sec is too large",
+			"token_lifetime_sec must be less than 4294967296",
+		)
+	}
+
 	var (
-		priceInCents     int = int(data.PriceInCents.ValueInt64())
-		slaSec           int = int(data.SlaSec.ValueInt64())
-		tokenLifetimeSec int = int(data.TokenLifetimeSec.ValueInt64())
+		_priceInCents     = utilities.NewCentValue(uint(priceInCents))
+		_slaSec           = utilities.NewUInt(uint(slaSec))
+		_tokenLifetimeSec = utilities.NewUInt(uint(tokenLifetimeSec))
 	)
 
 	resultUuid, err := e.script.Update(ctx, provider.UpdateScriptInput{
 		Name:             data.Name.ValueStringPointer(),
 		Description:      data.Description.ValueStringPointer(),
-		PriceInCents:     &priceInCents,
-		SlaSec:           &slaSec,
-		TokenLifetimeSec: &tokenLifetimeSec,
+		PriceInCents:     &_priceInCents,
+		SlaSec:           &_slaSec,
+		TokenLifetimeSec: &_tokenLifetimeSec,
 		Public:           data.Public.ValueBoolPointer(),
 	})
 	if err != nil {

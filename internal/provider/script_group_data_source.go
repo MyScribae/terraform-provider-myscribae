@@ -72,8 +72,10 @@ func (e *scriptGroupDataSource) MakeClient(ctx context.Context, providerId strin
 		Uuid:   providerUuid,
 		Client: e.terraformProvider.Client,
 	}
-	e.scriptGroup = e.myscribaeProvider.ScriptGroup(altId)
-
+	e.scriptGroup, err = e.myscribaeProvider.ScriptGroup(altId)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

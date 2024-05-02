@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	sdk "github.com/myscribae/myscribae-sdk-go"
 	"github.com/myscribae/myscribae-sdk-go/provider"
 	"github.com/myscribae/myscribae-terraform-provider/validators"
 )
@@ -44,7 +43,10 @@ func (e *scriptGroupResource) MakeClient(ctx context.Context, providerId string,
 		Uuid:   providerUuid,
 		Client: e.terraformProvider.Client,
 	}
-	e.scriptGroup = e.myscribaeProvider.ScriptGroup(altId)
+	e.scriptGroup, err = e.myscribaeProvider.ScriptGroup(altId)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -130,7 +132,7 @@ func (e *scriptGroupResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	resultUuid, err := e.scriptGroup.Create(ctx, sdk.ScriptGroupInput{
+	resultUuid, err := e.scriptGroup.Create(ctx, provider.CreateScriptGroupInput{
 		Name:        data.Name.ValueString(),
 		Description: data.Description.ValueString(),
 		Public:      data.Public.ValueBool(),

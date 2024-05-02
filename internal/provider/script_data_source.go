@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/myscribae/myscribae-sdk-go/provider"
+	"github.com/myscribae/myscribae-sdk-go/utilities"
 )
 
 var _ datasource.DataSource = (*scriptDataSource)(nil)
@@ -76,9 +77,15 @@ func (e *scriptDataSource) MakeClient(ctx context.Context, providerId string, sc
 		Uuid:   providerUuid,
 		Client: e.terraformProvider.Client,
 	}
-	e.script = e.myscribaeProvider.Script(scriptGroupId, altId)
 
-	return nil
+	scriptGroupAltID, err := utilities.NewAltUUID(scriptGroupId)
+	if err != nil {
+		return err
+	}
+
+	e.script, err = e.myscribaeProvider.Script(scriptGroupAltID, altId)
+
+	return err
 }
 
 func (e *scriptDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

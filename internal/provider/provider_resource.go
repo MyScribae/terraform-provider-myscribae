@@ -15,8 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/myscribae/myscribae-sdk-go/provider"
 	"github.com/myscribae/myscribae-terraform-provider/validators"
-
-	sdk "github.com/myscribae/myscribae-sdk-go"
 )
 
 var _ resource.Resource = (*myscribaeProviderResource)(nil)
@@ -24,7 +22,7 @@ var _ resource.ResourceWithConfigure = (*myscribaeProviderResource)(nil)
 
 type myscribaeProviderResource struct {
 	terraformProvider *myScribaeProvider
-	myscribaeProvider *sdk.Provider
+	myscribaeProvider *provider.Provider
 }
 
 type myscribaeProviderPlanData struct {
@@ -160,7 +158,7 @@ func (e *myscribaeProviderResource) MakeClient(ctx context.Context, providerId s
 		return err
 	}
 
-	e.myscribaeProvider = &sdk.Provider{
+	e.myscribaeProvider = &provider.Provider{
 		Uuid:   providerUuid,
 		Client: e.terraformProvider.Client,
 	}
