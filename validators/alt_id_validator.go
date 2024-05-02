@@ -7,16 +7,30 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
-type altIdValidator struct{}
+type altIdValidator struct{
+	required bool
+}
 
 var _ validator.String = (*altIdValidator)(nil)
 
-func NewAltIdValidator() validator.String {
-	return &altIdValidator{}
+func NewAltIdValidator(required bool) validator.String {
+	return &altIdValidator{
+		required: required,
+	}
 }
 
 func (u *altIdValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
-	val := req.ConfigValue.ValueString()
+	valPtr := req.ConfigValue.ValueStringPointer()
+
+	if valPtr == nil {
+		if !u.required {
+			resp.Diagnostics.AddError("alt_id cannot be empty", "alt_id provided is empty")
+			return
+		}
+
+		return
+	}
+	val := *valPtr
 
 	if val == "" {
 		resp.Diagnostics.AddError("alt_id cannot be empty", "alt_id provided is empty")
