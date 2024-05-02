@@ -93,7 +93,7 @@ func (e *scriptGroupResource) Schema(ctx context.Context, req resource.SchemaReq
 				Description: "The alt id of the script group",
 				Required:    true,
 				Validators: []validator.String{
-					validators.NewAltIdValidator(),
+					validators.NewAltIdValidator(true),
 				},
 			},
 			"name": schema.StringAttribute{

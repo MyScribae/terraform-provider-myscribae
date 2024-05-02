@@ -108,7 +108,7 @@ func (e *scriptResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				Description: "The alt id of the script",
 				Required:    true,
 				Validators: []validator.String{
-					validators.NewAltIdValidator(),
+					validators.NewAltIdValidator(true),
 				},
 			},
 			"uuid": schema.StringAttribute{
