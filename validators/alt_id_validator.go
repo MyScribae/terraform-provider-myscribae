@@ -23,7 +23,7 @@ func (u *altIdValidator) ValidateString(ctx context.Context, req validator.Strin
 	valPtr := req.ConfigValue.ValueStringPointer()
 
 	if valPtr == nil {
-		if !u.required {
+		if u.required {
 			resp.Diagnostics.AddError("alt_id cannot be empty", "alt_id provided is empty")
 			return
 		}
