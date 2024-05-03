@@ -180,6 +180,7 @@ func (e *scriptGroupResource) Read(ctx context.Context, req resource.ReadRequest
 	diags = resp.State.Set(ctx, &scriptGroupResourceData{
 		Id:          basetypes.NewStringValue(profile.Uuid.String()),
 		Uuid:        basetypes.NewStringValue(profile.Uuid.String()),
+		ProviderId:  basetypes.NewStringValue(profile.ProviderUuid.String()),
 		AltID:       basetypes.NewStringValue(profile.AltID),
 		Name:        basetypes.NewStringValue(profile.Name),
 		Description: basetypes.NewStringValue(profile.Description),
