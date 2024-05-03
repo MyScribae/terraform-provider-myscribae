@@ -45,4 +45,5 @@ resource "myscribae_script" "example" {
 
 ### Read-Only
 
+- `id` (String) The id of the script
 - `uuid` (String) The uuid of the script
