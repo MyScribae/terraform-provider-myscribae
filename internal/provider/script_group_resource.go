@@ -146,7 +146,7 @@ func (e *scriptGroupResource) Create(ctx context.Context, req resource.CreateReq
 	diags = resp.State.Set(ctx, &scriptGroupResourceData{
 		Id:          basetypes.NewStringValue(resultUuid.String()),
 		Uuid:        basetypes.NewStringValue(resultUuid.String()),
-		ProviderId:  basetypes.NewStringValue(data.ProviderId.String()),
+		ProviderId:  data.ProviderId,
 		AltID:       data.AltID,
 		Name:        data.Name,
 		Description: data.Description,
