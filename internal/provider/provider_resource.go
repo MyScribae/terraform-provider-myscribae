@@ -216,7 +216,7 @@ func (e *myscribaeProviderResource) Create(ctx context.Context, req resource.Cre
 		err = e.MakeClient(ctx, planData.Uuid.ValueString())
 		if err != nil {
 			resp.Diagnostics.AddError(
-				"failed to make client",
+				"failed to make client for create",
 				err.Error(),
 			)
 			return
@@ -296,7 +296,7 @@ func (e *myscribaeProviderResource) Read(ctx context.Context, req resource.ReadR
 
 	if err := e.MakeClient(ctx, currentState.Id.ValueString()); err != nil {
 		resp.Diagnostics.AddError(
-			"failed to make client",
+			"failed to make client for read",
 			err.Error(),
 		)
 		return
@@ -341,7 +341,7 @@ func (e *myscribaeProviderResource) Update(ctx context.Context, req resource.Upd
 
 	if err := e.MakeClient(ctx, currentState.Id.ValueString()); err != nil {
 		resp.Diagnostics.AddError(
-			"failed to make client",
+			"failed to make client for update",
 			err.Error(),
 		)
 		return
@@ -407,7 +407,7 @@ func (e *myscribaeProviderResource) Delete(ctx context.Context, req resource.Del
 
 	if err := e.MakeClient(ctx, currentState.Id.ValueString()); err != nil {
 		resp.Diagnostics.AddError(
-			"failed to make client",
+			"failed to make client for delete",
 			err.Error(),
 		)
 		return
