@@ -294,6 +294,14 @@ func (e *scriptResource) Read(ctx context.Context, req resource.ReadRequest, res
 		)
 	}
 
+	if e.script == nil {
+		panic("SCRIPT IS NULL WTF")
+	}
+
+	if e.script.Provider == nil {
+		panic("PROVIDER IS NULL WTF")
+	}
+
 	profile, err := e.script.Read(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError(
