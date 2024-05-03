@@ -90,6 +90,12 @@ func (e *scriptResource) MakeClient(ctx context.Context, providerId string, scri
 func (e *scriptResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Description: "The id of the script",
+				Computed:    true,
+				Required:    false,
+				Optional:    false,
+			},
 			"provider_id": schema.StringAttribute{
 				Description: "The provider id of the script",
 				Required:    true,
