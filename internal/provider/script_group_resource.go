@@ -146,7 +146,7 @@ func (e *scriptGroupResource) Create(ctx context.Context, req resource.CreateReq
 	diags = resp.State.Set(ctx, &scriptGroupResourceData{
 		Id:          basetypes.NewStringValue(resultUuid.String()),
 		Uuid:        basetypes.NewStringValue(resultUuid.String()),
-		ProviderId:  data.ProviderId,
+		ProviderId:  basetypes.NewStringValue(data.ProviderId.String()),
 		AltID:       data.AltID,
 		Name:        data.Name,
 		Description: data.Description,
@@ -182,7 +182,7 @@ func (e *scriptGroupResource) Read(ctx context.Context, req resource.ReadRequest
 	diags = resp.State.Set(ctx, &scriptGroupResourceData{
 		Id:          basetypes.NewStringValue(profile.Uuid.String()),
 		Uuid:        basetypes.NewStringValue(profile.Uuid.String()),
-		ProviderId:  basetypes.NewStringValue(profile.ProviderUuid.String()),
+		ProviderId:  data.ProviderId,
 		AltID:       basetypes.NewStringValue(profile.AltID),
 		Name:        basetypes.NewStringValue(profile.Name),
 		Description: basetypes.NewStringValue(profile.Description),
