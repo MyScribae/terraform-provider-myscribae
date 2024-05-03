@@ -40,9 +40,19 @@ type myscribaeProviderPlanData struct {
 }
 
 type myscribaeProviderResourceData struct {
-	myscribaeProviderPlanData
-	SecretKey types.String `tfsdk:"secret_key"`
-	ApiKey    types.String `tfsdk:"api_key"`
+	Id             types.String `tfsdk:"id"`
+	Name           types.String `tfsdk:"name"`
+	AltID          types.String `tfsdk:"alt_id"`
+	Uuid           types.String `tfsdk:"uuid"`
+	Description    types.String `tfsdk:"description"`
+	LogoUrl        types.String `tfsdk:"logo_url"`
+	BannerUrl      types.String `tfsdk:"banner_url"`
+	Url            types.String `tfsdk:"url"`
+	Color          types.String `tfsdk:"color"`
+	Public         types.Bool   `tfsdk:"public"`
+	AccountService types.Bool   `tfsdk:"account_service"`
+	SecretKey      types.String `tfsdk:"secret_key"`
+	ApiKey         types.String `tfsdk:"api_key"`
 }
 
 func newProviderResource() resource.Resource {
@@ -148,6 +158,14 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 				Optional:    true,
 				Computed:    true,
 				Default:     booldefault.StaticBool(true),
+			},
+			"secret_key": schema.StringAttribute{
+				Description: "The secret key of the provider",
+				Computed:    true,
+			},
+			"api_key": schema.StringAttribute{
+				Description: "The api key of the provider",
+				Computed:    true,
 			},
 		},
 	}
@@ -259,9 +277,19 @@ func (e *myscribaeProviderResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	state := myscribaeProviderResourceData{
-		myscribaeProviderPlanData: planData,
-		SecretKey:                 basetypes.NewStringPointerValue(e.myscribaeProvider.SecretKey),
-		ApiKey:                    basetypes.NewStringPointerValue(e.myscribaeProvider.ApiKey),
+		Id:             planData.Id,
+		Uuid:           planData.Uuid,
+		Name:           planData.Name,
+		AltID:          planData.AltID,
+		Description:    planData.Description,
+		LogoUrl:        planData.LogoUrl,
+		BannerUrl:      planData.BannerUrl,
+		Url:            planData.Url,
+		Color:          planData.Color,
+		Public:         planData.Public,
+		AccountService: planData.AccountService,
+		SecretKey:      basetypes.NewStringPointerValue(e.myscribaeProvider.SecretKey),
+		ApiKey:         basetypes.NewStringPointerValue(e.myscribaeProvider.ApiKey),
 	}
 
 	diags := resp.State.Set(ctx, state)
@@ -296,21 +324,19 @@ func (e *myscribaeProviderResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	newState := myscribaeProviderResourceData{
-		SecretKey: currentState.SecretKey,
-		ApiKey:    currentState.ApiKey,
-		myscribaeProviderPlanData: myscribaeProviderPlanData{
-			Id:             basetypes.NewStringValue(profile.Uuid.String()),
-			Uuid:           basetypes.NewStringValue(profile.Uuid.String()),
-			Name:           basetypes.NewStringValue(profile.Name),
-			AltID:          basetypes.NewStringPointerValue(profile.AltID),
-			Description:    basetypes.NewStringValue(profile.Description),
-			LogoUrl:        basetypes.NewStringPointerValue(profile.LogoUrl),
-			BannerUrl:      basetypes.NewStringPointerValue(profile.BannerUrl),
-			Url:            basetypes.NewStringPointerValue(profile.Url),
-			Color:          basetypes.NewStringPointerValue(profile.Color),
-			Public:         basetypes.NewBoolValue(profile.Public),
-			AccountService: basetypes.NewBoolValue(profile.AccountService),
-		},
+		SecretKey:      currentState.SecretKey,
+		ApiKey:         currentState.ApiKey,
+		Id:             basetypes.NewStringValue(profile.Uuid.String()),
+		Uuid:           basetypes.NewStringValue(profile.Uuid.String()),
+		Name:           basetypes.NewStringValue(profile.Name),
+		AltID:          basetypes.NewStringPointerValue(profile.AltID),
+		Description:    basetypes.NewStringValue(profile.Description),
+		LogoUrl:        basetypes.NewStringPointerValue(profile.LogoUrl),
+		BannerUrl:      basetypes.NewStringPointerValue(profile.BannerUrl),
+		Url:            basetypes.NewStringPointerValue(profile.Url),
+		Color:          basetypes.NewStringPointerValue(profile.Color),
+		Public:         basetypes.NewBoolValue(profile.Public),
+		AccountService: basetypes.NewBoolValue(profile.AccountService),
 	}
 
 	if d := resp.State.Set(ctx, &newState); d.HasError() {
@@ -362,9 +388,19 @@ func (e *myscribaeProviderResource) Update(ctx context.Context, req resource.Upd
 	planData.Id = basetypes.NewStringValue(resultUuid.String())
 	planData.Uuid = basetypes.NewStringValue(resultUuid.String())
 	newState := myscribaeProviderResourceData{
-		SecretKey:                 currentState.SecretKey,
-		ApiKey:                    currentState.ApiKey,
-		myscribaeProviderPlanData: planData,
+		SecretKey:      currentState.SecretKey,
+		ApiKey:         currentState.ApiKey,
+		Id:             planData.Id,
+		Uuid:           planData.Uuid,
+		Name:           planData.Name,
+		AltID:          planData.AltID,
+		Description:    planData.Description,
+		LogoUrl:        planData.LogoUrl,
+		BannerUrl:      planData.BannerUrl,
+		Url:            planData.Url,
+		Color:          planData.Color,
+		Public:         planData.Public,
+		AccountService: planData.AccountService,
 	}
 
 	diags := resp.State.Set(ctx, newState)

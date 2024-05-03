@@ -111,21 +111,19 @@ func (e *mysribaeProviderDataSource) Read(ctx context.Context, req datasource.Re
 	}
 
 	state := myscribaeProviderResourceData{
-		SecretKey: input.SecretKey,
-		ApiKey:    input.ApiKey,
-		myscribaeProviderPlanData: myscribaeProviderPlanData{
-			Id:             basetypes.NewStringValue(profile.Uuid.String()),
-			Uuid:           basetypes.NewStringValue(profile.Uuid.String()),
-			Name:           basetypes.NewStringValue(profile.Name),
-			AltID:          basetypes.NewStringPointerValue(profile.AltID),
-			Description:    basetypes.NewStringValue(profile.Description),
-			LogoUrl:        basetypes.NewStringPointerValue(profile.LogoUrl),
-			BannerUrl:      basetypes.NewStringPointerValue(profile.BannerUrl),
-			Url:            basetypes.NewStringPointerValue(profile.Url),
-			Color:          basetypes.NewStringPointerValue(profile.Color),
-			Public:         basetypes.NewBoolValue(profile.Public),
-			AccountService: basetypes.NewBoolValue(profile.AccountService),
-		},
+		SecretKey:      input.SecretKey,
+		ApiKey:         input.ApiKey,
+		Id:             basetypes.NewStringValue(profile.Uuid.String()),
+		Uuid:           basetypes.NewStringValue(profile.Uuid.String()),
+		Name:           basetypes.NewStringValue(profile.Name),
+		AltID:          basetypes.NewStringPointerValue(profile.AltID),
+		Description:    basetypes.NewStringValue(profile.Description),
+		LogoUrl:        basetypes.NewStringPointerValue(profile.LogoUrl),
+		BannerUrl:      basetypes.NewStringPointerValue(profile.BannerUrl),
+		Url:            basetypes.NewStringPointerValue(profile.Url),
+		Color:          basetypes.NewStringPointerValue(profile.Color),
+		Public:         basetypes.NewBoolValue(profile.Public),
+		AccountService: basetypes.NewBoolValue(profile.AccountService),
 	}
 
 	diags := resp.State.Set(ctx, &state)
