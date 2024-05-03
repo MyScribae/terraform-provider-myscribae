@@ -202,6 +202,7 @@ func (e *scriptResource) Create(ctx context.Context, req resource.CreateRequest,
 			"failed to create client",
 			err.Error(),
 		)
+		return
 	}
 
 	recurrence, err := utilities.NewRecurrence(data.Recurrence.ValueString())
@@ -237,6 +238,7 @@ func (e *scriptResource) Create(ctx context.Context, req resource.CreateRequest,
 			"token_lifetime_sec is too large",
 			"token_lifetime_sec must be less than 4294967296",
 		)
+		return
 	}
 
 	resultUuid, err := e.script.Create(ctx, provider.CreateScriptInput{
@@ -340,6 +342,7 @@ func (e *scriptResource) Update(ctx context.Context, req resource.UpdateRequest,
 			"failed to create client",
 			err.Error(),
 		)
+		return
 	}
 
 	priceInCents := uint64(planData.PriceInCents.ValueInt64())
@@ -419,6 +422,7 @@ func (e *scriptResource) Delete(ctx context.Context, req resource.DeleteRequest,
 			"failed to create client",
 			err.Error(),
 		)
+		return
 	}
 
 	err := e.script.Delete(ctx)

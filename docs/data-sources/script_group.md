@@ -26,3 +26,11 @@ data "myscribae_script_group" "example" {
 
 - `alt_id` (String) The alt id of the script group
 - `provider_id` (String) The provider id of the script group
+
+### Read-Only
+
+- `description` (String) The description of the script group
+- `id` (String) The id of the script group
+- `name` (String) The name of the script group
+- `public` (Boolean) The public status of the script group
+- `uuid` (String) The uuid of the script group

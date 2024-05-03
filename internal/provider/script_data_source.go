@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/myscribae/myscribae-sdk-go/provider"
 	"github.com/myscribae/myscribae-sdk-go/utilities"
@@ -19,12 +18,6 @@ type scriptDataSource struct {
 	terraformProvider *myScribaeProvider
 	myscribaeProvider *provider.Provider
 	script            *provider.Script
-}
-
-type scriptResourceConfig struct {
-	ProviderID    types.String `tfsdk:"provider_id"`
-	AltID         types.String `tfsdk:"alt_id"`
-	ScriptGroupID types.String `tfsdk:"script_group_id"`
 }
 
 func newScriptDataSource() datasource.DataSource {
@@ -52,6 +45,11 @@ func (e *scriptDataSource) Configure(ctx context.Context, req datasource.Configu
 func (e *scriptDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Description: "The id of the script",
+				Computed:    true,
+				Required:    false,
+			},
 			"provider_id": schema.StringAttribute{
 				Description: "The provider id of the script",
 				Required:    true,
@@ -63,6 +61,34 @@ func (e *scriptDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 			"alt_id": schema.StringAttribute{
 				Description: "The alt id of the script",
 				Required:    true,
+			},
+			"name": schema.StringAttribute{
+				Description: "The name of the script",
+				Computed:    true,
+			},
+			"description": schema.StringAttribute{
+				Description: "The description of the script",
+				Computed:    true,
+			},
+			"recurrence": schema.StringAttribute{
+				Description: "The recurrence of the script",
+				Computed:    true,
+			},
+			"price_in_cents": schema.Int64Attribute{
+				Description: "The price in cents of the script",
+				Computed:    true,
+			},
+			"sla_sec": schema.Int64Attribute{
+				Description: "The sla in seconds of the script",
+				Computed:    true,
+			},
+			"token_lifetime_sec": schema.Int64Attribute{
+				Description: "The token lifetime in seconds of the script",
+				Computed:    true,
+			},
+			"public": schema.BoolAttribute{
+				Description: "Is the script public",
+				Computed:    true,
 			},
 		},
 	}
@@ -89,7 +115,7 @@ func (e *scriptDataSource) MakeClient(ctx context.Context, providerId string, sc
 }
 
 func (e *scriptDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	data := &scriptResourceConfig{}
+	data := &scriptResourceData{}
 	if diags := req.Config.Get(ctx, data); diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -109,6 +135,8 @@ func (e *scriptDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	diags := resp.State.Set(ctx, &scriptResourceData{
 		Id:               basetypes.NewStringValue(profile.Uuid.String()),
 		Uuid:             basetypes.NewStringValue(profile.Uuid.String()),
+		ProviderID:       data.ProviderID,
+		ScriptGroupID:    data.ScriptGroupID,
 		AltID:            basetypes.NewStringValue(profile.AltID),
 		Name:             basetypes.NewStringValue(profile.Name),
 		Description:      basetypes.NewStringValue(profile.Description),

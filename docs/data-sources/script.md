@@ -28,3 +28,14 @@ data "myscribae_script" "example" {
 - `alt_id` (String) The alt id of the script
 - `provider_id` (String) The provider id of the script
 - `script_group_id` (String) The script group id
+
+### Read-Only
+
+- `description` (String) The description of the script
+- `id` (String) The id of the script
+- `name` (String) The name of the script
+- `price_in_cents` (Number) The price in cents of the script
+- `public` (Boolean) Is the script public
+- `recurrence` (String) The recurrence of the script
+- `sla_sec` (Number) The sla in seconds of the script
+- `token_lifetime_sec` (Number) The token lifetime in seconds of the script

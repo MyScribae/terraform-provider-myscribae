@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/myscribae/myscribae-sdk-go/provider"
 )
@@ -18,11 +17,6 @@ type scriptGroupDataSource struct {
 	terraformProvider *myScribaeProvider
 	myscribaeProvider *provider.Provider
 	scriptGroup       *provider.ScriptGroup
-}
-
-type scriptGroupResourceConfig struct {
-	ProviderID types.String `tfsdk:"provider_id"`
-	AltID      types.String `tfsdk:"alt_id"`
 }
 
 func newScriptGroupDataSource() datasource.DataSource {
@@ -50,13 +44,33 @@ func (e *scriptGroupDataSource) Configure(ctx context.Context, req datasource.Co
 func (e *scriptGroupDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Description: "The id of the script group",
+				Computed:    true,
+			},
 			"provider_id": schema.StringAttribute{
 				Description: "The provider id of the script group",
 				Required:    true,
 			},
+			"uuid": schema.StringAttribute{
+				Description: "The uuid of the script group",
+				Computed:    true,
+			},
 			"alt_id": schema.StringAttribute{
 				Description: "The alt id of the script group",
 				Required:    true,
+			},
+			"name": schema.StringAttribute{
+				Description: "The name of the script group",
+				Computed:    true,
+			},
+			"description": schema.StringAttribute{
+				Description: "The description of the script group",
+				Computed:    true,
+			},
+			"public": schema.BoolAttribute{
+				Description: "The public status of the script group",
+				Computed:    true,
 			},
 		},
 	}
@@ -80,7 +94,7 @@ func (e *scriptGroupDataSource) MakeClient(ctx context.Context, providerId strin
 }
 
 func (e *scriptGroupDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	data := &scriptGroupResourceConfig{}
+	data := &scriptGroupResourceData{}
 	if diags := req.Config.Get(ctx, data); diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -93,6 +107,7 @@ func (e *scriptGroupDataSource) Read(ctx context.Context, req datasource.ReadReq
 	}
 
 	diags := resp.State.Set(ctx, &scriptGroupResourceData{
+		ProviderId:  data.ProviderId,
 		Id:          basetypes.NewStringValue(profile.Uuid.String()),
 		Uuid:        basetypes.NewStringValue(profile.Uuid.String()),
 		AltID:       basetypes.NewStringValue(profile.AltID),
