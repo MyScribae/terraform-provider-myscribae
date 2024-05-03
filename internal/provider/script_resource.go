@@ -280,14 +280,14 @@ func (e *scriptResource) Create(ctx context.Context, req resource.CreateRequest,
 }
 
 func (e *scriptResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	data := scriptResourceData{}
-	diags := req.State.Get(ctx, &data)
+	stateData := scriptResourceData{}
+	diags := req.State.Get(ctx, &stateData)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	if err := e.MakeClient(ctx, data.ProviderID.ValueString(), data.ScriptGroupID.ValueString(), data.AltID.ValueString()); err != nil {
+	if err := e.MakeClient(ctx, stateData.ProviderID.ValueString(), stateData.ScriptGroupID.ValueString(), stateData.AltID.ValueString()); err != nil {
 		resp.Diagnostics.AddError(
 			"failed to create client",
 			err.Error(),
@@ -306,8 +306,8 @@ func (e *scriptResource) Read(ctx context.Context, req resource.ReadRequest, res
 	diags = resp.State.Set(ctx, &scriptResourceData{
 		Id:               basetypes.NewStringValue(profile.Uuid.String()),
 		Uuid:             basetypes.NewStringValue(profile.Uuid.String()),
-		ScriptGroupID:    data.ScriptGroupID,
-		ProviderID:       data.ProviderID,
+		ScriptGroupID:    stateData.ScriptGroupID,
+		ProviderID:       stateData.ProviderID,
 		AltID:            basetypes.NewStringValue(profile.AltID),
 		Name:             basetypes.NewStringValue(profile.Name),
 		Description:      basetypes.NewStringValue(profile.Description),
