@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework v1.8.0
 	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
 	github.com/hasura/go-graphql-client v0.12.1
-	github.com/myscribae/myscribae-sdk-go v0.0.13
+	github.com/myscribae/myscribae-sdk-go v0.0.14
 )
 
 require (

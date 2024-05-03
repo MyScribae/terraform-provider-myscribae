@@ -155,6 +155,8 @@ github.com/myscribae/myscribae-sdk-go v0.0.12 h1:fYrf0o+T2KhC8v/JJ+xllEBtjppkuNe
 github.com/myscribae/myscribae-sdk-go v0.0.12/go.mod h1:ZDO754N27h/ErYFXP4cLjGzBQconbk8JwP3KQZlw6CA=
 github.com/myscribae/myscribae-sdk-go v0.0.13 h1:FV9gVVG3yucZd8t6/5WYfqYQrYius0TKF07NMWxaHoY=
 github.com/myscribae/myscribae-sdk-go v0.0.13/go.mod h1:ZDO754N27h/ErYFXP4cLjGzBQconbk8JwP3KQZlw6CA=
+github.com/myscribae/myscribae-sdk-go v0.0.14 h1:rjgOg8sIOsCaTIqHYmwDGD+GEqCzOOpSyHp6oiLYW+M=
+github.com/myscribae/myscribae-sdk-go v0.0.14/go.mod h1:ZDO754N27h/ErYFXP4cLjGzBQconbk8JwP3KQZlw6CA=
 github.com/oklog/run v1.0.0 h1:Ru7dDtJNOyC66gQ5dQmaCa0qIsAUFY3sFpK1Xk8igrw=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/pjbgf/sha1cd v0.3.0 h1:4D5XXmUUBUl/xQ6IjCkEAbqXskkq/4O7LmGn0AqMDs4=
