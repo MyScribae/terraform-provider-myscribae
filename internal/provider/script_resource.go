@@ -263,6 +263,7 @@ func (e *scriptResource) Create(ctx context.Context, req resource.CreateRequest,
 	diags = resp.State.Set(ctx, &scriptResourceData{
 		Id:               basetypes.NewStringValue(resultUuid.String()),
 		Uuid:             basetypes.NewStringValue(resultUuid.String()),
+		ProviderID:       data.ProviderID,
 		ScriptGroupID:    data.ScriptGroupID,
 		AltID:            data.AltID,
 		Name:             data.Name,
@@ -306,7 +307,8 @@ func (e *scriptResource) Read(ctx context.Context, req resource.ReadRequest, res
 		Id:               basetypes.NewStringValue(profile.Uuid.String()),
 		Uuid:             basetypes.NewStringValue(profile.Uuid.String()),
 		ScriptGroupID:    data.ScriptGroupID,
-		AltID:            data.AltID,
+		ProviderID:       data.ProviderID,
+		AltID:            basetypes.NewStringValue(profile.AltID),
 		Name:             basetypes.NewStringValue(profile.Name),
 		Description:      basetypes.NewStringValue(profile.Description),
 		Recurrence:       basetypes.NewStringValue(profile.Recurrence),
@@ -322,21 +324,28 @@ func (e *scriptResource) Read(ctx context.Context, req resource.ReadRequest, res
 }
 
 func (e *scriptResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	data := scriptResourceData{}
-	diags := req.Plan.Get(ctx, &data)
+	stateData := scriptResourceData{}
+	diags := req.State.Get(ctx, &stateData)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	if err := e.MakeClient(ctx, data.ProviderID.ValueString(), data.ScriptGroupID.ValueString(), data.AltID.ValueString()); err != nil {
+	planData := scriptResourceData{}
+	diags = req.Plan.Get(ctx, &planData)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	if err := e.MakeClient(ctx, planData.ProviderID.ValueString(), planData.ScriptGroupID.ValueString(), planData.AltID.ValueString()); err != nil {
 		resp.Diagnostics.AddError(
 			"failed to create client",
 			err.Error(),
 		)
 	}
 
-	priceInCents := uint64(data.PriceInCents.ValueInt64())
+	priceInCents := uint64(planData.PriceInCents.ValueInt64())
 	if priceInCents > math.MaxUint32 {
 		resp.Diagnostics.AddError(
 			"price_in_cents is too large",
@@ -345,7 +354,7 @@ func (e *scriptResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	slaSec := data.SlaSec.ValueInt64()
+	slaSec := planData.SlaSec.ValueInt64()
 	if slaSec > math.MaxUint32 {
 		resp.Diagnostics.AddError(
 			"sla_sec is too large",
@@ -354,7 +363,7 @@ func (e *scriptResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	tokenLifetimeSec := data.TokenLifetimeSec.ValueInt64()
+	tokenLifetimeSec := planData.TokenLifetimeSec.ValueInt64()
 	if tokenLifetimeSec > math.MaxUint32 {
 		resp.Diagnostics.AddError(
 			"token_lifetime_sec is too large",
@@ -369,12 +378,12 @@ func (e *scriptResource) Update(ctx context.Context, req resource.UpdateRequest,
 	)
 
 	resultUuid, err := e.script.Update(ctx, provider.UpdateScriptInput{
-		Name:             data.Name.ValueStringPointer(),
-		Description:      data.Description.ValueStringPointer(),
+		Name:             planData.Name.ValueStringPointer(),
+		Description:      planData.Description.ValueStringPointer(),
 		PriceInCents:     &_priceInCents,
 		SlaSec:           &_slaSec,
 		TokenLifetimeSec: &_tokenLifetimeSec,
-		Public:           data.Public.ValueBoolPointer(),
+		Public:           planData.Public.ValueBoolPointer(),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -384,18 +393,16 @@ func (e *scriptResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	diags = resp.State.Set(ctx, &scriptResourceData{
-		Id:               basetypes.NewStringValue(resultUuid.String()),
-		Uuid:             basetypes.NewStringValue(resultUuid.String()),
-		ScriptGroupID:    data.ScriptGroupID,
-		AltID:            data.AltID,
-		Name:             data.Name,
-		Description:      data.Description,
-		PriceInCents:     data.PriceInCents,
-		SlaSec:           data.SlaSec,
-		TokenLifetimeSec: data.TokenLifetimeSec,
-		Public:           data.Public,
-	})
+	stateData.Name = planData.Name
+	stateData.Description = planData.Description
+	stateData.PriceInCents = planData.PriceInCents
+	stateData.SlaSec = planData.SlaSec
+	stateData.TokenLifetimeSec = planData.TokenLifetimeSec
+	stateData.Public = planData.Public
+	stateData.Uuid = basetypes.NewStringValue(resultUuid.String())
+	stateData.Id = basetypes.NewStringValue(resultUuid.String())
+
+	diags = resp.State.Set(ctx, &stateData)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
