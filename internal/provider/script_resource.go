@@ -169,7 +169,7 @@ func (e *scriptResource) Schema(ctx context.Context, req resource.SchemaRequest,
 
 func (e *scriptResource) Plan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
 	data := scriptResourceData{}
-	diags := req.State.Get(ctx, data)
+	diags := req.State.Get(ctx, &data)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -189,7 +189,7 @@ func (e *scriptResource) Plan(ctx context.Context, req resource.ModifyPlanReques
 
 func (e *scriptResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	data := scriptResourceData{}
-	diags := req.Plan.Get(ctx, data)
+	diags := req.Plan.Get(ctx, &data)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -274,7 +274,7 @@ func (e *scriptResource) Create(ctx context.Context, req resource.CreateRequest,
 
 func (e *scriptResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	data := scriptResourceData{}
-	diags := req.State.Get(ctx, data)
+	diags := req.State.Get(ctx, &data)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -317,7 +317,7 @@ func (e *scriptResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 func (e *scriptResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	data := scriptResourceData{}
-	diags := req.Plan.Get(ctx, data)
+	diags := req.Plan.Get(ctx, &data)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -398,7 +398,7 @@ func (e *scriptResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 func (e *scriptResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	data := scriptResourceData{}
-	diags := req.State.Get(ctx, data)
+	diags := req.State.Get(ctx, &data)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
