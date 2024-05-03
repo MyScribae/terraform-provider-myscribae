@@ -25,20 +25,6 @@ type myscribaeProviderResource struct {
 	myscribaeProvider *provider.Provider
 }
 
-type myscribaeProviderPlanData struct {
-	Id             types.String `tfsdk:"id"`
-	Name           types.String `tfsdk:"name"`
-	AltID          types.String `tfsdk:"alt_id"`
-	Uuid           types.String `tfsdk:"uuid"`
-	Description    types.String `tfsdk:"description"`
-	LogoUrl        types.String `tfsdk:"logo_url"`
-	BannerUrl      types.String `tfsdk:"banner_url"`
-	Url            types.String `tfsdk:"url"`
-	Color          types.String `tfsdk:"color"`
-	Public         types.Bool   `tfsdk:"public"`
-	AccountService types.Bool   `tfsdk:"account_service"`
-}
-
 type myscribaeProviderResourceData struct {
 	Id             types.String `tfsdk:"id"`
 	Name           types.String `tfsdk:"name"`
@@ -186,7 +172,7 @@ func (e *myscribaeProviderResource) MakeClient(ctx context.Context, providerId s
 }
 
 func (e *myscribaeProviderResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	planData := myscribaeProviderPlanData{}
+	planData := myscribaeProviderResourceData{}
 	if diags := req.Plan.Get(ctx, &planData); diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -359,7 +345,7 @@ func (e *myscribaeProviderResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	planData := myscribaeProviderPlanData{}
+	planData := myscribaeProviderResourceData{}
 	if diags := req.Plan.Get(ctx, &planData); diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
