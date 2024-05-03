@@ -173,7 +173,7 @@ func (e *scriptGroupResource) Read(ctx context.Context, req resource.ReadRequest
 	// Set the data in the response
 	profile, err := e.scriptGroup.Read(ctx)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to get script group: %s", err.Error())
+		resp.Diagnostics.AddError("failed to get script group", err.Error())
 		return
 	}
 
@@ -193,8 +193,15 @@ func (e *scriptGroupResource) Read(ctx context.Context, req resource.ReadRequest
 }
 
 func (e *scriptGroupResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	state := scriptGroupResourceData{}
+	diags := req.State.Get(ctx, &state)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	data := scriptGroupResourceData{}
-	diags := req.Plan.Get(ctx, &data)
+	diags = req.Plan.Get(ctx, &data)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -215,10 +222,13 @@ func (e *scriptGroupResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	data.Uuid = basetypes.NewStringValue(resultUuid.String())
-	data.Id = basetypes.NewStringValue(resultUuid.String())
+	state.Id = basetypes.NewStringValue(resultUuid.String())
+	state.Uuid = basetypes.NewStringValue(resultUuid.String())
+	state.Name = data.Name
+	state.Description = data.Description
+	state.Public = data.Public
 
-	diags = resp.State.Set(ctx, &data)
+	diags = resp.State.Set(ctx, &state)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
