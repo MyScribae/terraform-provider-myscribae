@@ -213,7 +213,7 @@ func (e *scriptGroupResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	resultUuid, err := e.scriptGroup.Update(ctx, provider.UpdateScriptGroupInput{
+	_, err := e.scriptGroup.Update(ctx, provider.UpdateScriptGroupInput{
 		Name:        data.Name.ValueStringPointer(),
 		Description: data.Description.ValueStringPointer(),
 		Public:      data.Public.ValueBoolPointer(),
@@ -223,8 +223,6 @@ func (e *scriptGroupResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	state.Id = basetypes.NewStringValue(resultUuid.String())
-	state.Uuid = basetypes.NewStringValue(resultUuid.String())
 	state.Name = data.Name
 	state.Description = data.Description
 	state.Public = data.Public
