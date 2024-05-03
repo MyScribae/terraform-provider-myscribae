@@ -222,7 +222,7 @@ func (e *myscribaeProviderResource) Create(ctx context.Context, req resource.Cre
 			return
 		}
 
-		_, err = e.myscribaeProvider.Update(ctx, provider.UpdateProviderProfileInput{
+		provUuid, err := e.myscribaeProvider.Update(ctx, provider.UpdateProviderProfileInput{
 			AltID:          planData.AltID.ValueStringPointer(),
 			Name:           planData.Name.ValueStringPointer(),
 			Description:    planData.Description.ValueStringPointer(),
@@ -241,6 +241,9 @@ func (e *myscribaeProviderResource) Create(ctx context.Context, req resource.Cre
 			return
 		}
 
+		planData.Id = basetypes.NewStringValue(provUuid.String())
+		planData.Uuid = basetypes.NewStringValue(provUuid.String())
+
 		// if we do not have a secret key, which likely, then we must update the secret key and keep it in state
 		// this is a one time operation, unless the secret key needs to be reset
 		err = e.myscribaeProvider.ResetProviderKeys(ctx)
@@ -251,7 +254,6 @@ func (e *myscribaeProviderResource) Create(ctx context.Context, req resource.Cre
 			)
 			return
 		}
-
 	}
 
 	if err != nil {
@@ -376,8 +378,8 @@ func (e *myscribaeProviderResource) Update(ctx context.Context, req resource.Upd
 	newState := myscribaeProviderResourceData{
 		SecretKey:      currentState.SecretKey,
 		ApiKey:         currentState.ApiKey,
-		Id:             planData.Id,
-		Uuid:           planData.Uuid,
+		Id:             basetypes.NewStringValue(resultUuid.String()),
+		Uuid:           basetypes.NewStringValue(resultUuid.String()),
 		Name:           planData.Name,
 		AltID:          planData.AltID,
 		Description:    planData.Description,
