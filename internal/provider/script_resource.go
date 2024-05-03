@@ -80,11 +80,7 @@ func (e *scriptResource) MakeClient(ctx context.Context, providerId string, scri
 		Client: e.terraformProvider.Client,
 	}
 	e.script, err = e.myscribaeProvider.Script(scriptGroupAltID, altId)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (e *scriptResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -292,14 +288,7 @@ func (e *scriptResource) Read(ctx context.Context, req resource.ReadRequest, res
 			"failed to create client",
 			err.Error(),
 		)
-	}
-
-	if e.script == nil {
-		panic("SCRIPT IS NULL WTF")
-	}
-
-	if e.script.Provider == nil {
-		panic("PROVIDER IS NULL WTF")
+		return
 	}
 
 	profile, err := e.script.Read(ctx)
