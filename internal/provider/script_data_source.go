@@ -78,7 +78,7 @@ func (e *scriptDataSource) MakeClient(ctx context.Context, providerId string, sc
 		Client: e.terraformProvider.Client,
 	}
 
-	scriptGroupAltID, err := utilities.NewAltUUID(scriptGroupId)
+	scriptGroupAltID, err := utilities.NewAltUuid(scriptGroupId)
 	if err != nil {
 		return err
 	}

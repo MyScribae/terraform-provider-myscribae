@@ -70,7 +70,7 @@ func (e *scriptResource) MakeClient(ctx context.Context, providerId string, scri
 		return err
 	}
 
-	scriptGroupAltID, err := utilities.NewAltUUID(scriptGroupId)
+	scriptGroupAltID, err := utilities.NewAltUuid(scriptGroupId)
 	if err != nil {
 		return err
 	}
