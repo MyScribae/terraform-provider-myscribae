@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -138,7 +139,7 @@ func (e *scriptGroupResource) Create(ctx context.Context, req resource.CreateReq
 		Public:      data.Public.ValueBool(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("failed to create script group: %s", err.Error())
+		resp.Diagnostics.AddError(fmt.Sprintf("failed to create script group: %s", err), err.Error())
 		return
 	}
 
