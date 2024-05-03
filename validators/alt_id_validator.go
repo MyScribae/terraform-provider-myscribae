@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
-type altIdValidator struct{
+type altIdValidator struct {
 	required bool
 }
 
