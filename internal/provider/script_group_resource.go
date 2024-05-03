@@ -129,7 +129,7 @@ func (e *scriptGroupResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	if err := e.MakeClient(ctx, data.ProviderId.ValueString(), data.AltID.ValueString()); err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("failed to create script group client: %s", err), err.Error())
+		resp.Diagnostics.AddError(fmt.Sprintf("failed to create script group client for create: %s", err), err.Error())
 		return
 	}
 
@@ -167,7 +167,7 @@ func (e *scriptGroupResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 	if err := e.MakeClient(ctx, data.ProviderId.ValueString(), data.AltID.ValueString()); err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("failed to create script group client: %s", err), err.Error())
+		resp.Diagnostics.AddError(fmt.Sprintf("failed to create script group client for read: %s", err), err.Error())
 		return
 	}
 
@@ -209,7 +209,7 @@ func (e *scriptGroupResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	if err := e.MakeClient(ctx, data.ProviderId.ValueString(), data.AltID.ValueString()); err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("failed to create script group client: %s", err), err.Error())
+		resp.Diagnostics.AddError(fmt.Sprintf("failed to create script group client for update: %s", err), err.Error())
 		return
 	}
 
@@ -245,7 +245,7 @@ func (e *scriptGroupResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 
 	if err := e.MakeClient(ctx, data.ProviderId.ValueString(), data.AltID.ValueString()); err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("failed to create script group client: %s", err), err.Error())
+		resp.Diagnostics.AddError(fmt.Sprintf("failed to create script group client for delete: %s", err), err.Error())
 		return
 	}
 
