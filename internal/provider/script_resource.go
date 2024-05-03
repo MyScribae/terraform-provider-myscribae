@@ -242,6 +242,7 @@ func (e *scriptResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	resultUuid, err := e.script.Create(ctx, provider.CreateScriptInput{
+		AltID:            data.AltID.ValueString(),
 		Name:             data.Name.ValueString(),
 		Description:      data.Description.ValueString(),
 		Recurrence:       *recurrence,

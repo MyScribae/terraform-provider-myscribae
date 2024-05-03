@@ -65,7 +65,6 @@ func (e *mysribaeProviderDataSource) Schema(ctx context.Context, req datasource.
 				Computed:    true,
 			},
 			"logo_url": schema.StringAttribute{
-
 				Description: "The logo url of the provider",
 				Computed:    true,
 			},
