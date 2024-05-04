@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -72,16 +73,17 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 			"alt_id": schema.StringAttribute{
 				Description: "The alt id of the provider",
 				Optional:    true,
-				Required:    false,
 				Validators: []validator.String{
 					validators.NewAltIdValidator(false),
+					validators.NewXorValidator([]string{
+						"uuid",
+					}, true),
 				},
+				PlanModifiers: []planmodifier.String{},
 			},
 			"uuid": schema.StringAttribute{
 				Description: "The uuid of the provider",
 				Optional:    true,
-				Computed:    true,
-				Required:    false,
 				Validators: []validator.String{
 					validators.NewUuidValidator(false),
 				},
@@ -130,7 +132,7 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 				Computed:    true,
 				Default:     stringdefault.StaticString("#A0A0A0"),
 				Validators: []validator.String{
-					validators.NewColorValidator(),
+					validators.NewColorValidator(false),
 				},
 			},
 			"public": schema.BoolAttribute{
@@ -148,10 +150,12 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 			"secret_key": schema.StringAttribute{
 				Description: "The secret key of the provider",
 				Computed:    true,
+				Sensitive:   true,
 			},
 			"api_key": schema.StringAttribute{
 				Description: "The api key of the provider",
 				Computed:    true,
+				Sensitive:   true,
 			},
 		},
 	}

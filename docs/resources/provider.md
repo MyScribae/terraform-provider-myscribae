@@ -44,6 +44,6 @@ resource "myscribae_provider" "example" {
 
 ### Read-Only
 
-- `api_key` (String) The api key of the provider
+- `api_key` (String, Sensitive) The api key of the provider
 - `id` (String) The id of the provider
-- `secret_key` (String) The secret key of the provider
+- `secret_key` (String, Sensitive) The secret key of the provider

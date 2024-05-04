@@ -6,17 +6,28 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
-type colorValidator struct{}
+type colorValidator struct {
+	required bool
+}
 
 var _ validator.String = (*colorValidator)(nil)
 
-func NewColorValidator() validator.String {
-	return &colorValidator{}
+func NewColorValidator(required bool) validator.String {
+	return &colorValidator{
+		required: required,
+	}
 }
 
 func (u *colorValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
-	val := req.ConfigValue.ValueString()
+	valPtr := req.ConfigValue.ValueStringPointer()
+	if valPtr == nil {
+		if u.required {
+			resp.Diagnostics.AddError("color cannot be empty", "color provided is empty")
+		}
+		return
+	}
 
+	val := *valPtr
 	if val == "" {
 		resp.Diagnostics.AddError("color cannot be empty", "color provided is empty")
 		return

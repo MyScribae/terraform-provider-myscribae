@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -87,8 +88,6 @@ func (e *scriptGroupResource) Schema(ctx context.Context, req resource.SchemaReq
 			"uuid": schema.StringAttribute{
 				Description: "The uuid of the script",
 				Computed:    true,
-				Required:    false,
-				Optional:    false,
 			},
 			"alt_id": schema.StringAttribute{
 				Description: "The alt id of the script group",
@@ -113,7 +112,9 @@ func (e *scriptGroupResource) Schema(ctx context.Context, req resource.SchemaReq
 			},
 			"public": schema.BoolAttribute{
 				Description: "Is the script group public",
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(false),
 			},
 		},
 	}

@@ -31,6 +31,9 @@ resource "myscribae_script_group" "example" {
 - `description` (String) The description of the script group
 - `name` (String) The name of the script group
 - `provider_id` (String) The provider id of the script group
+
+### Optional
+
 - `public` (Boolean) Is the script group public
 
 ### Read-Only

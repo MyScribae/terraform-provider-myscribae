@@ -37,11 +37,14 @@ resource "myscribae_script" "example" {
 - `name` (String) The name of the script
 - `price_in_cents` (Number) The price in cents of the script (minimum 1)
 - `provider_id` (String) The provider id of the script
-- `public` (Boolean) Is the script public
 - `recurrence` (String) The recurrence of the script
 - `script_group_id` (String) The script group uuid
 - `sla_sec` (Number) The SLA in seconds of the script (minimum 2400)
 - `token_lifetime_sec` (Number) The token lifetime in seconds of the script (minimum 600)
+
+### Optional
+
+- `public` (Boolean) Is the script public
 
 ### Read-Only
 

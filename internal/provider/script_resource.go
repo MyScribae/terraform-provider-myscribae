@@ -10,6 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -89,8 +92,6 @@ func (e *scriptResource) Schema(ctx context.Context, req resource.SchemaRequest,
 			"id": schema.StringAttribute{
 				Description: "The id of the script",
 				Computed:    true,
-				Required:    false,
-				Optional:    false,
 			},
 			"provider_id": schema.StringAttribute{
 				Description: "The provider id of the script",
@@ -116,8 +117,6 @@ func (e *scriptResource) Schema(ctx context.Context, req resource.SchemaRequest,
 			"uuid": schema.StringAttribute{
 				Description: "The uuid of the script",
 				Computed:    true,
-				Required:    false,
-				Optional:    false,
 			},
 			"name": schema.StringAttribute{
 				Description: "The name of the script",
@@ -138,6 +137,9 @@ func (e *scriptResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				Required:    true,
 				Validators: []validator.String{
 					validators.NewRecurrenceValidator(),
+				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"price_in_cents": schema.Int64Attribute{
@@ -163,7 +165,9 @@ func (e *scriptResource) Schema(ctx context.Context, req resource.SchemaRequest,
 			},
 			"public": schema.BoolAttribute{
 				Description: "Is the script public",
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(false),
 			},
 		},
 	}
