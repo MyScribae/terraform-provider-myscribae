@@ -395,7 +395,7 @@ func (e *myscribaeProviderResource) Update(ctx context.Context, req resource.Upd
 		AccountService: planData.AccountService,
 	}
 
-	diags := resp.State.Set(ctx, newState)
+	diags := resp.State.Set(ctx, &newState)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
