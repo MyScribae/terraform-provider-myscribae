@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -87,6 +88,10 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 				Validators: []validator.String{
 					validators.NewUuidValidator(false),
 				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"name": schema.StringAttribute{
 				Description: "The name of the provider",
@@ -151,11 +156,17 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 				Description: "The secret key of the provider",
 				Computed:    true,
 				Sensitive:   true,
+				PlanModifiers: []planmodifier.String {
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"api_key": schema.StringAttribute{
 				Description: "The api key of the provider",
 				Computed:    true,
 				Sensitive:   true,
+				PlanModifiers: []planmodifier.String {
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 	}
