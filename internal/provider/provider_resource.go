@@ -156,7 +156,7 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 				Description: "The secret key of the provider",
 				Computed:    true,
 				Sensitive:   true,
-				PlanModifiers: []planmodifier.String {
+				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
@@ -164,7 +164,7 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 				Description: "The api key of the provider",
 				Computed:    true,
 				Sensitive:   true,
-				PlanModifiers: []planmodifier.String {
+				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
