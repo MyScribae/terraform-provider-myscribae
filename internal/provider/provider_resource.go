@@ -144,13 +144,13 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 				Description: "The public status of the provider",
 				Optional:    true,
 				Computed:    true,
-				Default:     booldefault.StaticBool(true),
+				Default:     booldefault.StaticBool(false),
 			},
 			"account_service": schema.BoolAttribute{
 				Description: "The account service status of the provider",
 				Optional:    true,
 				Computed:    true,
-				Default:     booldefault.StaticBool(true),
+				Default:     booldefault.StaticBool(false),
 			},
 			"secret_key": schema.StringAttribute{
 				Description: "The secret key of the provider",
