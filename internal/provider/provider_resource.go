@@ -78,7 +78,7 @@ func (e *myscribaeProviderResource) Schema(ctx context.Context, req resource.Sch
 					validators.NewAltIdValidator(false),
 					validators.NewXorValidator([]string{
 						"uuid",
-					}, true),
+					}, false),
 				},
 				PlanModifiers: []planmodifier.String{},
 			},

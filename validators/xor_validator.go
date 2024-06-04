@@ -37,12 +37,10 @@ func (u *xorValidator) ValidateString(ctx context.Context, req validator.StringR
 		count++
 	}
 
-	if count == 0 {
-		resp.Diagnostics.AddError("at least one field is required", fmt.Sprintf("at least one field is required from %v", u.fields))
+	if u.requiresOne && count != 1 {
+		resp.Diagnostics.AddError("exactly one field is required", fmt.Sprintf("exactly one field is required from %v", u.fields))
 		return
-	}
-
-	if u.requiresOne && count > 1 {
+	} else if count > 1 {
 		resp.Diagnostics.AddError("only one field is allowed", fmt.Sprintf("only one field is allowed from %v", u.fields))
 		return
 	}
