@@ -161,7 +161,7 @@ func (e *mysribaeProviderDataSource) Read(ctx context.Context, req datasource.Re
 		Url:            basetypes.NewStringPointerValue(profile.Url),
 		Color:          basetypes.NewStringPointerValue(profile.Color),
 		Public:         basetypes.NewBoolValue(profile.Public),
-		AccountService: basetypes.NewBoolValue(profile.AccountService),
+		AccountService: basetypes.NewBoolValue(profile.AccountService.Enabled),
 	}
 
 	diags := resp.State.Set(ctx, &state)

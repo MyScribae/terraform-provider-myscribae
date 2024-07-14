@@ -339,7 +339,7 @@ func (e *myscribaeProviderResource) Read(ctx context.Context, req resource.ReadR
 		Url:            basetypes.NewStringPointerValue(profile.Url),
 		Color:          basetypes.NewStringPointerValue(profile.Color),
 		Public:         basetypes.NewBoolValue(profile.Public),
-		AccountService: basetypes.NewBoolValue(profile.AccountService),
+		AccountService: basetypes.NewBoolValue(profile.AccountService.Enabled),
 	}
 
 	if d := resp.State.Set(ctx, &newState); d.HasError() {
