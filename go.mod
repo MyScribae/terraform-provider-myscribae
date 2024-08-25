@@ -1,6 +1,6 @@
 module github.com/myscribae/myscribae-terraform-provider
 
-go 1.22
+go 1.22.6
 
 require (
 	github.com/google/uuid v1.6.0
