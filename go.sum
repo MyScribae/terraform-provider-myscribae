@@ -137,8 +137,8 @@ github.com/mitchellh/go-testing-interface v1.14.1/go.mod h1:gfgS7OtZj6MA4U1UrDRp
 github.com/mitchellh/reflectwalk v1.0.0/go.mod h1:mSTlrgnPZtwu0c4WaC2kGObEpuNDbx0jmZXqmk4esnw=
 github.com/mitchellh/reflectwalk v1.0.2 h1:G2LzWKi524PWgd3mLHV8Y5k7s6XUvT0Gef6zxSIeXaQ=
 github.com/mitchellh/reflectwalk v1.0.2/go.mod h1:mSTlrgnPZtwu0c4WaC2kGObEpuNDbx0jmZXqmk4esnw=
-github.com/myscribae/myscribae-sdk-go v0.0.19 h1:dpogzeu1gtbySeeicdVxq7weCGLsOWJXKAt96xoQUAU=
-github.com/myscribae/myscribae-sdk-go v0.0.19/go.mod h1:cUNowihIeQDSnIzwkQ0X068sexl0BSvi5QdjgDBsQSk=
+github.com/myscribae/myscribae-sdk-go v0.0.20 h1:z4OM2i5CKyKMRunzfuyoFgqSh5D9b0EwEqLsW/EY7iQ=
+github.com/myscribae/myscribae-sdk-go v0.0.20/go.mod h1:cUNowihIeQDSnIzwkQ0X068sexl0BSvi5QdjgDBsQSk=
 github.com/oklog/run v1.0.0 h1:Ru7dDtJNOyC66gQ5dQmaCa0qIsAUFY3sFpK1Xk8igrw=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/pjbgf/sha1cd v0.3.0 h1:4D5XXmUUBUl/xQ6IjCkEAbqXskkq/4O7LmGn0AqMDs4=
